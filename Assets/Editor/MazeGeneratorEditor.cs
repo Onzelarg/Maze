@@ -23,12 +23,14 @@ public class MazeGeneratorInspector : Editor
 
         if (GUILayout.Button("Generate"))
         {
-            _mazeGenerator.generateGrid();
+            _mazeGenerator.generate();
+            
+
         }
 
         if (GUILayout.Button("ClearG"))
         {
-            _mazeGenerator.clearGrid();
+            
         }
 
         /*
