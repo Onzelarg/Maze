@@ -5,92 +5,91 @@ using System;
 using System.Reflection;
 using UnityEngine.UIElements;
 
+//  Tile object 
+//  Stores position, floor and wall objects and materials
+//
 public class Tiles
 {
-    GameObject wall;
-    GameObject floor;
-    GameObject[] walls;
+    public GameObject[] tile;   //  Gameobject array=[floor + 4 walls]
+    float x;    // Position
+    float z;    // Position
+    float wall_size = 0.6f;     // Wall size in scale
+    public int[] side;      // Wall array, 0 = no wall, 1 = wall
+    Vector3 left_right = new Vector3(0, 0, 90);     // Offset from x,z position
+    Vector3 front_back = new Vector3(90, 0, 0);     // Offset from x,z position
+    public int index;       // The tiles index in the floors array
+    bool visited = false;       // Bool to check if the tile has already been visited by the maze algorithm or part of a room
 
-    float x;
-    float z;
-    float tile_size;
-    float wall_size = 0.6f;
-    float cell_scale;
-
-    Vector3 left_right = new Vector3(0, 0, 90);
-    Vector3 front_back = new Vector3(90, 0, 0);
-    
-    public int index;
-
-
-    public Tiles(Vector3 position,float tilesize,GameObject _floor,GameObject _wall,int _index,float _cell_scale)
+    //  ************************************************************************************************************************************* //
+    //  ************************************************************************************************************************************* //
+    //  Constructor which calls the tiles generation
+    public Tiles(Vector3 position,GameObject _floor,int _index,float _cell_scale)
     {
         this.x = position.x;
         this.z = position.z;
-        this.tile_size = tilesize;
-        this.floor = _floor;
-        this.wall = _wall;
         this.index = _index;
-        this.cell_scale = _cell_scale;
-        generateCell();
+        generateCell(_floor,_cell_scale);
     }
 
-    void generateCell()
+    // Generating and rotating the floor
+    void generateCell(GameObject _floor,float _cell_scale)
     {
-        floor=UnityEngine.Object.Instantiate(floor, new Vector3(this.x,0,this.z), new Quaternion());
-        floor.name = "Tile " + (int)(index + 1);
-        floor.transform.localScale = new Vector3(cell_scale, 1, cell_scale);
+        tile = new GameObject[5];
+        tile[0] = UnityEngine.Object.Instantiate(_floor, new Vector3(this.x,0,this.z), new Quaternion());
+        tile[0].name = "Tile " + (int)(index + 1);
+        tile[0].transform.localScale = new Vector3(_cell_scale, 1, _cell_scale);
     }
 
-    public void generateSide(int[] side)
+    // Generating walls depending on side array
+    public void generateSide(int[] _side,GameObject _wall,float _tile_size, float _cell_scale)
     {
         //left     //1
         //right    //2
         //front    //3
         //back     //4
-        walls = new GameObject[4];
-        float xz_offset = tile_size / 2 + wall_size / 2;
-        float y = tile_size / 2;
+
+        side = _side;
+        float xz_offset = _tile_size / 2 + wall_size / 2;
+        float y = _tile_size / 2;
         if (side[0] == 1)
         {
-            
-            walls[0] = UnityEngine.Object.Instantiate(wall, new Vector3(this.x - xz_offset, y, this.z), new Quaternion());
-            walls[0].transform.Rotate(left_right);
-            walls[0].name = "Wall " + (int)(index + 1) + " left";
-            walls[0].transform.localScale = new Vector3(cell_scale*10, wall_size, cell_scale*10);
+            tile[1] = UnityEngine.Object.Instantiate(_wall, new Vector3(this.x - xz_offset, y, this.z), new Quaternion());
+            tile[1].transform.Rotate(left_right);
+            tile[1].name = "Wall " + (int)(index + 1) + " left";
+            tile[1].transform.localScale = new Vector3(_cell_scale * 10, wall_size, _cell_scale * 10);
         }
         if (side[1] == 1)
         {
-            walls[1] = UnityEngine.Object.Instantiate(wall, new Vector3(this.x + xz_offset, y, this.z), new Quaternion());
-            walls[1].transform.Rotate(left_right);
-            walls[1].name = "Wall " + (int)(index + 1) + " right";
-            walls[1].transform.localScale = new Vector3(cell_scale * 10, wall_size, cell_scale * 10);
+            tile[2] = UnityEngine.Object.Instantiate(_wall, new Vector3(this.x + xz_offset, y, this.z), new Quaternion());
+            tile[2].transform.Rotate(left_right);
+            tile[2].name = "Wall " + (int)(index + 1) + " right";
+            tile[2].transform.localScale = new Vector3(_cell_scale * 10, wall_size, _cell_scale * 10);
         }
         if (side[2] == 1)
         {
-            walls[2] = UnityEngine.Object.Instantiate(wall, new Vector3(this.x, y, this.z - xz_offset), new Quaternion());
-            walls[2].transform.Rotate(front_back);
-            walls[2].name = "Wall " + (int)(index + 1) + " front";
-            walls[2].transform.localScale = new Vector3(cell_scale * 10, wall_size, cell_scale * 10);
+            tile[3] = UnityEngine.Object.Instantiate(_wall, new Vector3(this.x, y, this.z - xz_offset), new Quaternion());
+            tile[3].transform.Rotate(front_back);
+            tile[3].name = "Wall " + (int)(index + 1) + " front";
+            tile[3].transform.localScale = new Vector3(_cell_scale * 10, wall_size, _cell_scale * 10);
         }
         if (side[3] == 1)
         {
-            walls[3] = UnityEngine.Object.Instantiate(wall, new Vector3(this.x, y, this.z + xz_offset), new Quaternion());
-            walls[3].transform.Rotate(front_back);
-            walls[3].name = "Wall " + (int)(index + 1) + " back";
-            walls[3].transform.localScale = new Vector3(cell_scale * 10, wall_size, cell_scale * 10);
+            tile[4] = UnityEngine.Object.Instantiate(_wall, new Vector3(this.x, y, this.z + xz_offset), new Quaternion());
+            tile[4].transform.Rotate(front_back);
+            tile[4].name = "Wall " + (int)(index + 1) + " back";
+            tile[4].transform.localScale = new Vector3(_cell_scale * 10, wall_size, _cell_scale * 10);
         }
 
     }
 
-
-    public void destroyObjects()
+    // Destroys all stored objects
+    public void clear()
     {
-        UnityEngine.Object.Destroy(floor);
-        for (int i = 0; i < walls.Length; i++)
+        for (int i = 0; i < tile.Length; i++)
         {
-            UnityEngine.Object.Destroy(walls[i]);
+            UnityEngine.Object.Destroy(tile[i]);
         }
+
     }
 
 }

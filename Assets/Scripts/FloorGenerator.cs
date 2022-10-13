@@ -8,18 +8,26 @@ using UnityEngine.UIElements;
 
 public class FloorGenerator
 {
+    //  Floor details: Width,height,total size, minimum and maximum room size
+    //  Its Index in the game logic
     int floor_width;
     int floor_height;
     int size;
-    int min_room;
-    int max_room;
+    public int min_room;
+    public int max_room;
     int index;
-    Tiles[] cells;
+    // Cells array,holding all cells within the floor
+    public Tiles[] cells;
+    // Cell size and scale within the size
+    public float tile_size;
     float tile_scale;
-    float tile_size;
+    // Floor and wall object which gets pushed to the cells
     GameObject floor;
     GameObject wall;
 
+    //  ************************************************************************************************************************************* //
+    //  ************************************************************************************************************************************* //
+    // Constructor which generates the floor object
     public FloorGenerator(float _tile_size, int _grid_width, int _grid_height, float _cell_scale, int _index,GameObject _floor,GameObject _wall)
     {
         this.index = _index;
@@ -37,15 +45,17 @@ public class FloorGenerator
 
     }
 
+    // Clears and destroys the whole floor
     public void clearGrid()
     {
         for (int i = 0; i < cells.Length; i++)
         {
-            cells[i].destroyObjects();
+            cells[i].clear();
         }
         cells = new Tiles[0];
     }
 
+    // Grid generation that fills the cells array
     public void generateGrid()
     {
         if (cells != null)
@@ -68,12 +78,29 @@ public class FloorGenerator
             {
                 Vector3 cell_position = new Vector3(j * tile_size, 0, i * tile_size);
 
-                cells[cell_index] = new Tiles(cell_position, tile_size, floor, wall, cell_index, tile_scale);
-                cells[cell_index].generateSide(new int[] { 1, 1, 1, 1 });
+                cells[cell_index] = new Tiles(cell_position,  floor, cell_index, tile_scale);
+                int[] sides = new int[4];
+                System.Random rnd = new System.Random();
+                for (int k = 0; k < 4; k++)
+                {
+                    sides[k]= (int)(rnd.Next(0, 2));
+                }
+
+                //cells[cell_index].generateSide(sides,wall,tile_size,tile_scale);
 
                 cell_index++;
             }
         }
+        Debug.Log(cells.Length);
+    }
+
+    public void generateRoom()
+    {
+
+
+
+
+
 
     }
 

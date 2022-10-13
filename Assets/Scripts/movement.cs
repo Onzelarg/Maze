@@ -1,13 +1,10 @@
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
+using System;
 
 public class movement : MonoBehaviour
 {
     public GameObject player;
-
-    //public float speed;
-    //public float acceleration;
-    //public float maxSpeed;
-    //public float jump_height;
 
     public int speed;
     public int acceleration;
@@ -15,7 +12,8 @@ public class movement : MonoBehaviour
     public int jump_height;
 
     public Vector3 jump;
-    
+
+
     void Start()
     {
          player = GameObject.FindGameObjectWithTag("Player");
@@ -25,7 +23,7 @@ public class movement : MonoBehaviour
          jump_height = 10;
          jump = new Vector3(0, jump_height, 0);
         player.transform.position = new Vector3(0, 10, 0);
-
+        
     }
 
     // Update is called once per frame
@@ -43,7 +41,9 @@ public class movement : MonoBehaviour
             {
                 speed += acceleration;
             }
-            Debug.Log(player.transform.position.x + " : " + player.transform.position.z);
+            //Debug.Log("Player position: "+player.transform.position.x + " : " + player.transform.position.z);
+
+
         }
         if (horizontalInput==0 && verticalInput==0)
         {
@@ -59,5 +59,17 @@ public class movement : MonoBehaviour
         }
 
     }
+
+    void OnCollisionEnter(Collision floor)
+    {
+        MazeGenerator.update_material(floor.collider.name);
+
+    }
+
+    
+    
+
+
+
 }
 
