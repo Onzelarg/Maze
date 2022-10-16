@@ -20,6 +20,42 @@ public class MazeGeneratorInspector : Editor
     int max_f;
     int cell_quantity;
     int[] side=new int[4];
+    int seed = 12345678;
+    string _seed = "12345678";
+
+    char[] letterIndex = { 'A','a','B','b','C','c','D','d','E','e','F','f','G','g','H','h','I','i','J',
+        'j','K','k','L','l','M','m','N','n','O','o','P','p','Q','q','R','r','S','s','T','t','U','u','V',
+        'v','W','w','X','x','Y','y','Z','z'};
+
+    int[] letterValue={1000,999,2000,1999,3000,3999,4000,4999,5000,5999,6000,6999,7000,7999,8000,8999,9000,
+        9999,10000,10999,11000,11999,12000,12999,13000,13999,14000,14999,15000,15999,16000,16999,17000,17999,
+        18000,18999,19000,19999,20000,20999,21000,21999,22000,22999,23000,23999,24000,24999,25000,25999,26000,26999};
+
+    int returnSeed(string _seed)
+    {
+        int seed = 0;
+        try
+        {
+            seed = Convert.ToInt32(_seed);
+        }
+        catch (Exception)
+        {
+            for (int i = 0; i < _seed.Length; i++)
+            {
+                for (int j = 0; j < letterIndex.Length; j++)
+                {
+                    if (_seed[i] == letterIndex[j])
+                    {
+                        seed = seed + letterValue[j];
+                        Debug.Log("Seed: " + seed);
+                        break;
+                    }
+                }
+            }
+        }
+        return seed;
+    }
+
 
     public override void OnInspectorGUI()
     {
@@ -30,13 +66,21 @@ public class MazeGeneratorInspector : Editor
 
         if (GUILayout.Button("Generate"))
         {
-            _mazeGenerator.generate();
+            _mazeGenerator.clear();
+            seed = returnSeed(_seed);
+            _mazeGenerator.generate(seed);
 
         }
 
         if (GUILayout.Button("ClearG"))
         {
             _mazeGenerator.clear();
+        }
+
+        if (GUILayout.Button("Room Gen"))
+        {
+            _mazeGenerator.generateRooms();
+
         }
 
         /*
@@ -72,6 +116,7 @@ public class MazeGeneratorInspector : Editor
 
         }
 
+        
 
         GUILayout.EndHorizontal();
 
@@ -101,8 +146,6 @@ public class MazeGeneratorInspector : Editor
             index = GUILayout.TextField(index, 5);
         GUILayout.EndHorizontal();
 
-        
-
         GUILayout.BeginHorizontal();
             GUILayout.Label("Cell Index");
             cell_index = GUILayout.TextField(cell_index, 5);
@@ -116,12 +159,16 @@ public class MazeGeneratorInspector : Editor
             GUILayout.Label("Back " + side[3]);
         GUILayout.EndHorizontal();
 
-
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Seed");
+        _seed = GUILayout.TextField(_seed, 10);
+        
+        GUILayout.EndHorizontal();
 
         // GUILayout.BeginHorizontal();
         // GUILayout.EndHorizontal();
     }
-   
 
+    
 
 }

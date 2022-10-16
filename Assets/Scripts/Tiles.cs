@@ -5,24 +5,18 @@ using System;
 using System.Reflection;
 using UnityEngine.UIElements;
 
-//  Tile object 
-//  Stores position, floor and wall objects and materials
-//
 public class Tiles
 {
-    public GameObject[] tile;   //  Gameobject array=[floor + 4 walls]
-    float x;    // Position
-    float z;    // Position
-    float wall_size = 0.6f;     // Wall size in scale
-    public int[] side;      // Wall array, 0 = no wall, 1 = wall
-    Vector3 left_right = new Vector3(0, 0, 90);     // Offset from x,z position
-    Vector3 front_back = new Vector3(90, 0, 0);     // Offset from x,z position
-    public int index;       // The tiles index in the floors array
-    bool visited = false;       // Bool to check if the tile has already been visited by the maze algorithm or part of a room
+    public GameObject[] tile;  
+    float x;   
+    float z;    
+    float wall_size = 0.6f; 
+    public int[] side;     
+    Vector3 left_right = new Vector3(0, 0, 90);    
+    Vector3 front_back = new Vector3(90, 0, 0);    
+    public int index;      
+    bool visited = false;      
 
-    //  ************************************************************************************************************************************* //
-    //  ************************************************************************************************************************************* //
-    //  Constructor which calls the tiles generation
     public Tiles(Vector3 position,GameObject _floor,int _index,float _cell_scale)
     {
         this.x = position.x;
@@ -31,7 +25,6 @@ public class Tiles
         generateCell(_floor,_cell_scale);
     }
 
-    // Generating and rotating the floor
     void generateCell(GameObject _floor,float _cell_scale)
     {
         tile = new GameObject[5];
@@ -40,7 +33,6 @@ public class Tiles
         tile[0].transform.localScale = new Vector3(_cell_scale, 1, _cell_scale);
     }
 
-    // Generating walls depending on side array
     public void generateSide(int[] _side,GameObject _wall,float _tile_size, float _cell_scale)
     {
         //left     //1
@@ -82,7 +74,6 @@ public class Tiles
 
     }
 
-    // Destroys all stored objects
     public void clear()
     {
         for (int i = 0; i < tile.Length; i++)

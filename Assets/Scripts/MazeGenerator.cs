@@ -18,7 +18,9 @@ public class MazeGenerator : MonoBehaviour
     static public FloorGenerator[] floors;
     int index;
     static public Material visited;
-
+    public int floorSize;
+    public int floorMin;
+    public int floorMax;
 
     //left z-90 right z+90
     //front x+90 back x+90 
@@ -33,19 +35,25 @@ public class MazeGenerator : MonoBehaviour
         index = 0;
         floors = new FloorGenerator[10];
         visited = Resources.Load("Room") as Material;
-        generate();
+        generate(12345678);
     }
 
-    public void generate()
+    public void generate(int seed)
     {
-        floors[index] = new FloorGenerator(tile_size, grid_width, grid_height,cell_scale,index,floor,wall);
-
+        floors[index] = new FloorGenerator(tile_size, grid_width, grid_height,cell_scale,index,floor,wall,seed);
+        floorSize = floors[index].size;
+        floorMin = floors[index].min_room;
+        floorMax = floors[index].max_room;
     }
 
     public void clear()
     {
         floors[0].clearGrid();
 
+    }
+    public void generateRooms()
+    {
+        floors[0].generateRoom();
     }
 
     public int update_data(int data,int index)
