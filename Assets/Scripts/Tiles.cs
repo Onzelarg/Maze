@@ -8,8 +8,8 @@ using UnityEngine.UIElements;
 public class Tiles
 {
     public GameObject[] tile;  
-    float x;   
-    float z;    
+    public float x;   
+    public float z;    
     float wall_size = 0.6f; 
     public int[] side;     
     Vector3 left_right = new Vector3(0, 0, 90);    

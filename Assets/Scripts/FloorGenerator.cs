@@ -9,8 +9,8 @@ using System.IO;
 public class FloorGenerator
 {
 
-    int floor_width;
-    int floor_height;
+    public int floor_width;
+    public int floor_height;
     public int size;
     public int min_room;
     public int max_room;
@@ -21,23 +21,61 @@ public class FloorGenerator
     GameObject floor;
     GameObject wall;
     int seed;
-    Room[] rooms;
+    List<Room> rooms=new List<Room>();
 
     protected class Room
     {
-        public int top;
-        public int bottom;
-        public int left;
-        public int right;
+        public int topleft;
+        public int topright;
+        public int bottomleft;
+        public int bottomright;
+
         public int room_size;
         public int room_width;
         public int room_height;
+        int[] room_cells;
 
         public Room(int size,int w,int h)
         {
             this.room_size = size;
             this.room_width = w;
             this.room_height = h;
+            room_cells = new int[size];
+        }
+
+        public void generate(int _cell_index,bool _x_positive, bool _z_positive,int _floor_w,int _floor_h)
+        {
+            if (_x_positive && _z_positive)
+            {
+                this.bottomleft = _cell_index;
+            }
+            else if(_x_positive && !_z_positive)
+            {
+                this.topleft = _cell_index;
+            }
+            else if (!_x_positive && _z_positive)
+            {
+                this.bottomright = _cell_index;
+            }
+            else if (!_x_positive && !_z_positive)
+            {
+                this.topright = _cell_index;
+            }
+
+
+
+
+            for (int x = 0; x < room_width; x++)
+            {
+                for (int z = 0; z < room_height; z++)
+                {
+
+
+
+
+                }
+            }
+
         }
     }
 
@@ -120,7 +158,6 @@ public class FloorGenerator
         int room_height=0;
         int created_rooms = 0;
         int minimum_created_rooms = 30;
-        rooms = new Room[10];
 
         using (StreamWriter writetext = new StreamWriter("Debugs/room_generation.txt"))
         {
@@ -129,100 +166,113 @@ public class FloorGenerator
             {
                 cell_index = (int)(rnd.Next(0, this.size));
                 room_size = (int)(rnd.Next(this.min_room, this.max_room));
-
-                Debug.Log("Tries: " + tried);
-                Debug.Log("Current Size: " + current_size);
-                Debug.Log("<color=green>Created rooms: " + created_rooms + "</color>");
-
+                bool can_divided = true;
+                int room_dim_x = 0;
+                int room_dim_z = 0;
+                bool can_fit = true;
+                bool room_directionX_positive = true;
+                bool room_directionZ_positive = true;
+                
                 writetext.WriteLine("");
                 writetext.WriteLine("Tries: " + (tried+1));
                 writetext.WriteLine("Current Size: " + current_size);
                 writetext.WriteLine("Generated Size: " + room_size+" added: "+ (current_size+room_size));
+
                 if (current_size + room_size < max_size_rooms)
                 {
-                    current_size += room_size;
+
                     if (room_size % 11 == 0)
                     {
                         room_width = 11;
                         room_height = room_size / 11;
-                        rooms[created_rooms] = new Room(room_size, room_width, room_height);
-                        created_rooms++;
-                        Debug.Log("<color=yellow>" + 11 + "</color>");
-                        Debug.Log("Cell index: " + cell_index);
-                        Debug.Log("<color=red>Size: " + room_size + " Width: " + room_width + " Height: " + room_height + "</color>");
-
-                        writetext.WriteLine("Created rooms: " + created_rooms);
-                        writetext.WriteLine("Cell index: " + cell_index);
-                        writetext.WriteLine("Size: " + room_size + " Width: " + room_width + " Height: " + room_height);
-                        writetext.WriteLine("Room added");
                     }
                     else if (room_size % 7 == 0)
                     {
                         room_width = 7;
                         room_height = room_size / 7;
-                        rooms[created_rooms] = new Room(room_size, room_width, room_height);
-                        created_rooms++;
-                        Debug.Log("Cell index: " + cell_index);
-                        Debug.Log("<color=red>Size: " + room_size + " Width: " + room_width + " Height: " + room_height + "</color>");
-
-                        writetext.WriteLine("Created rooms: " + created_rooms);
-                        writetext.WriteLine("Cell index: " + cell_index);
-                        writetext.WriteLine("Size: " + room_size + " Width: " + room_width + " Height: " + room_height);
-                        writetext.WriteLine("Room added");
                     }
                     else if (room_size % 5 == 0)
                     {
                         room_width = 5;
                         room_height = room_size / 5;
-                        rooms[created_rooms] = new Room(room_size, room_width, room_height);
-                        created_rooms++;
-                        Debug.Log("<color=yellow>" + 5 + "</color>");
-                        Debug.Log("Cell index: " + cell_index);
-                        Debug.Log("<color=red>Size: " + room_size + " Width: " + room_width + " Height: " + room_height + "</color>");
-
-                        writetext.WriteLine("Created rooms: " + created_rooms);
-                        writetext.WriteLine("Cell index: " + cell_index);
-                        writetext.WriteLine("Size: " + room_size + " Width: " + room_width + " Height: " + room_height);
-                        writetext.WriteLine("Room added");
                     }
                     else if (room_size % 3 == 0)
                     {
                         room_width = 3;
                         room_height = room_size / 3;
-                        rooms[created_rooms] = new Room(room_size, room_width, room_height);
-                        created_rooms++;
-                        Debug.Log("<color=yellow>" + 3 + "</color>");
-                        Debug.Log("Cell index: " + cell_index);
-                        Debug.Log("<color=red>Size: " + room_size + " Width: " + room_width + " Height: " + room_height + "</color>");
-
-                        writetext.WriteLine("Created rooms: " + created_rooms);
-                        writetext.WriteLine("Cell index: " + cell_index);
-                        writetext.WriteLine("Size: " + room_size + " Width: " + room_width + " Height: " + room_height);
-                        writetext.WriteLine("Room added");
                     }
                     else if (room_size % 2 == 0)
                     {
                         room_width = 2;
                         room_height = room_size / 2;
-                        rooms[created_rooms] = new Room(room_size, room_width, room_height);
-                        created_rooms++;
-                        Debug.Log("<color=yellow>" + 2 + "</color>");
-                        Debug.Log("Cell index: " + cell_index);
-                        Debug.Log("<color=red>Size: " + room_size + " Width: " + room_width + " Height: " + room_height + "</color>");
-
-                        writetext.WriteLine("Created rooms: " + created_rooms);
-                        writetext.WriteLine("Cell index: " + cell_index);
-                        writetext.WriteLine("Size: " + room_size + " Width: " + room_width + " Height: " + room_height);
-                        writetext.WriteLine("Room added");
                     }
                     else
                     {
-                        current_size -= room_size;
-                        Debug.Log("<color=blue>Landed here</color>");
-
-                        writetext.WriteLine("Can't be divided");
+                        can_divided = false;
+                        writetext.WriteLine("Can't be divided");  
                     }
 
+                    if (can_divided)
+                    {
+                        //x*tile_size
+                        //z*tile_size
+                        
+                        
+
+                        if (cells[cell_index].x!=0)
+                        {
+                            room_dim_x = (int)((cells[cell_index].x / tile_size)+1);
+                        }
+                        if (cells[cell_index].z != 0)
+                        {
+                            room_dim_z = (int)((cells[cell_index].z / tile_size)+1);
+                        }
+
+
+                        if ((room_dim_x+(room_width-1)<floor_width))
+                        {
+                            
+                        }else if((room_dim_x - (room_width - 1) > 0))
+                        {
+                            room_directionX_positive = false;
+                        }
+                        else
+                        {
+                            can_fit = false;
+                        }
+
+
+                        if (room_dim_z + (room_height - 1) < floor_height)
+                        {
+
+                        }else if (room_dim_z+ - (room_height - 1) > 0)
+                        {
+                            room_directionZ_positive = false;
+                        }
+                        else
+                        {
+                            can_fit = false;
+                        }
+
+
+                        if (can_fit)
+                        {
+                            current_size += room_size;
+                            rooms.Add(new Room(room_size, room_width, room_height));
+                            rooms[created_rooms].generate(cell_index,room_directionX_positive,room_directionZ_positive,floor_width,floor_height);
+                            created_rooms++;
+
+                            writetext.WriteLine("Created rooms: " + created_rooms);
+                            writetext.WriteLine("Cell index: " + cell_index);
+                            writetext.WriteLine("Size: " + room_size + " Width: " + room_width + " Height: " + room_height);
+                            writetext.WriteLine("Room added");
+                        }
+                        else
+                        {
+                            writetext.WriteLine("Can't fit into grid");
+                        }
+
+                    }
 
                 }
                 else
@@ -230,10 +280,11 @@ public class FloorGenerator
                     writetext.WriteLine("Room too big");
                 }
 
+
+
+
                 if (max_size_rooms - current_size < this.min_room)
                 {
-                    Debug.Log(max_size_rooms - current_size + " : " + this.min_room);
-                    Debug.Log("Size break");
 
                     writetext.WriteLine(max_size_rooms - current_size + " : " + this.min_room);
                     writetext.WriteLine("Size break");
@@ -243,8 +294,6 @@ public class FloorGenerator
                 tried++;
                 if (minimum_created_rooms == created_rooms){ break; }
             } while (tried!=tries);
-            Debug.Log("Sizes: " + max_size_rooms + " : " + current_size);
-            Debug.Log("Created rooms: "+(created_rooms+1));
 
             writetext.WriteLine("");
             writetext.WriteLine("Sizes: " + max_size_rooms + " : " + current_size);

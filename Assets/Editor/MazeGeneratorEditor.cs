@@ -56,7 +56,7 @@ public class MazeGeneratorInspector : Editor
         return seed;
     }
 
-
+     
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
