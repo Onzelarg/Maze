@@ -36,6 +36,7 @@ public class MazeGenerator : MonoBehaviour
         floors = new FloorGenerator[10];
         visited = Resources.Load("Room") as Material;
         generate(12345678);
+        //floors[0].generateRoom();
     }
 
     public void generate(int seed)
@@ -91,6 +92,12 @@ public class MazeGenerator : MonoBehaviour
             floors[0].cells[cell_index].tile[0].GetComponent<Renderer>().material = visited;
         }
     }
-    
+
+    public void room(int room)
+    {
+        floors[0].rooms[room].changeMaterial(floors[0].cells);
+
+
+    }
 
 }

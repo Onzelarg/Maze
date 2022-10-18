@@ -22,6 +22,7 @@ public class MazeGeneratorInspector : Editor
     int[] side=new int[4];
     int seed = 12345678;
     string _seed = "12345678";
+    string _room = "0";
 
     char[] letterIndex = { 'A','a','B','b','C','c','D','d','E','e','F','f','G','g','H','h','I','i','J',
         'j','K','k','L','l','M','m','N','n','O','o','P','p','Q','q','R','r','S','s','T','t','U','u','V',
@@ -163,6 +164,16 @@ public class MazeGeneratorInspector : Editor
         GUILayout.Label("Seed");
         _seed = GUILayout.TextField(_seed, 10);
         
+        GUILayout.EndHorizontal();
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Room");
+        _room = GUILayout.TextField(_room, 2);
+        if (GUILayout.Button("Room"))
+        {
+            _mazeGenerator.room(Convert.ToInt32(_room));
+
+        }
         GUILayout.EndHorizontal();
 
         // GUILayout.BeginHorizontal();

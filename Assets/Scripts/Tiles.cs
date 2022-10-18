@@ -15,13 +15,19 @@ public class Tiles
     Vector3 left_right = new Vector3(0, 0, 90);    
     Vector3 front_back = new Vector3(90, 0, 0);    
     public int index;      
-    bool visited = false;      
+    bool visited = false;
+    public Material visited_mat;
+    public Material corner;
+    public Material index_mat;
 
     public Tiles(Vector3 position,GameObject _floor,int _index,float _cell_scale)
     {
         this.x = position.x;
         this.z = position.z;
         this.index = _index;
+        visited_mat = Resources.Load("Room") as Material;
+        corner = Resources.Load("Corner") as Material;
+        index_mat = Resources.Load("Index") as Material;
         generateCell(_floor,_cell_scale);
     }
 
@@ -29,7 +35,7 @@ public class Tiles
     {
         tile = new GameObject[5];
         tile[0] = UnityEngine.Object.Instantiate(_floor, new Vector3(this.x,0,this.z), new Quaternion());
-        tile[0].name = "Tile " + (int)(index + 1);
+        tile[0].name = "Tile " + (int)(index);
         tile[0].transform.localScale = new Vector3(_cell_scale, 1, _cell_scale);
     }
 
@@ -74,6 +80,18 @@ public class Tiles
 
     }
 
+    public void changeMaterial()
+    {
+        tile[0].GetComponent<Renderer>().material = visited_mat;
+    }
+    public void _corner()
+    {
+        tile[0].GetComponent<Renderer>().material = corner;
+    }
+    public void cellindex()
+    {
+        tile[0].GetComponent<Renderer>().material = index_mat;
+    }
     public void clear()
     {
         for (int i = 0; i < tile.Length; i++)
