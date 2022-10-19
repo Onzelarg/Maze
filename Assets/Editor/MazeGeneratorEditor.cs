@@ -23,6 +23,10 @@ public class MazeGeneratorInspector : Editor
     int seed = 12345678;
     string _seed = "12345678";
     string _room = "0";
+    int method;
+    bool overlap = true;
+    bool merged = false;
+    bool touch = false;
 
     char[] letterIndex = { 'A','a','B','b','C','c','D','d','E','e','F','f','G','g','H','h','I','i','J',
         'j','K','k','L','l','M','m','N','n','O','o','P','p','Q','q','R','r','S','s','T','t','U','u','V',
@@ -78,11 +82,7 @@ public class MazeGeneratorInspector : Editor
             _mazeGenerator.clear();
         }
 
-        if (GUILayout.Button("Room Gen"))
-        {
-            _mazeGenerator.generateRooms();
-
-        }
+       
 
         /*
         if (GUILayout.Button("ClearW"))
@@ -121,6 +121,50 @@ public class MazeGeneratorInspector : Editor
 
         GUILayout.EndHorizontal();
 
+        GUILayout.BeginHorizontal();
+       
+        if (GUILayout.Button("Room Gen"))
+        {
+            _mazeGenerator.generateRooms(method);
+
+        }
+        GUILayout.Label("Overlap: ");
+        if (EditorGUILayout.Toggle(overlap))
+        {
+            overlap = true;
+            merged = false;
+            touch = false;
+            method = 1;
+        }
+        else
+        {
+            overlap = false;
+        }
+        GUILayout.Label("Merged: ");
+        if (EditorGUILayout.Toggle(merged))
+        {
+            overlap = false;
+            merged = true;
+            touch = false;
+            method = 2;
+        }
+        else
+        {
+            merged = false;
+        }
+        GUILayout.Label("Only touch: ");
+        if (EditorGUILayout.Toggle(touch))
+        {
+            overlap = false;
+            merged = false;
+            touch = true;
+            method = 3;
+        }
+        else
+        {
+            touch = false;
+        }
+        GUILayout.EndHorizontal();
 
         /*
         GUILayout.BeginHorizontal();
@@ -172,7 +216,10 @@ public class MazeGeneratorInspector : Editor
         if (GUILayout.Button("Room"))
         {
             _mazeGenerator.room(Convert.ToInt32(_room));
-
+        }
+        if (GUILayout.Button("Room all"))
+        {
+            _mazeGenerator.room();
         }
         GUILayout.EndHorizontal();
 

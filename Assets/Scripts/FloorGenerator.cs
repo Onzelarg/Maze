@@ -23,113 +23,6 @@ public class FloorGenerator
     int seed;
     public List<Room> rooms=new List<Room>();
 
-    public class Room
-    {
-        public int topleft;
-        public int topright;
-        public int bottomleft;
-        public int bottomright;
-
-        public int room_size;
-        public int room_width;
-        public int room_height;
-        public int[] room_cells;
-        public int cell_index;
-
-        public Room(int size,int w,int h)
-        {
-            this.room_size = size;
-            this.room_width = w;
-            this.room_height = h;
-            room_cells = new int[size];
-        }
-
-
-        public void generate(int _cell_index, bool _x_positive, bool _z_positive, int _floor_w, int _floor_h,int created_rooms)
-        {
-            this.cell_index = _cell_index;
-            using (StreamWriter writetext = new StreamWriter("Debugs/room_cell_generation"+created_rooms+".txt"))
-            {
-                if (_x_positive && _z_positive)
-                {
-                    this.bottomleft = _cell_index;
-                    this.bottomright = bottomleft + room_width-1;
-                    this.topleft = bottomleft + ((room_height-1) * _floor_w);
-                    this.topright = topleft + room_width-1;
-                    writetext.WriteLine("Cell index is bottom left ");
-                }
-                else if (_x_positive && !_z_positive)
-                {
-                    this.topleft = _cell_index;
-                    this.topright = topleft + room_width-1;
-                    this.bottomleft = topleft - ((room_height-1) * _floor_w);
-                    this.bottomright = bottomleft + room_width-1;
-                    writetext.WriteLine("Cell index is top left ");
-                }
-                else if (!_x_positive && _z_positive)
-                {
-                    this.bottomright = _cell_index;
-                    this.bottomleft = bottomright - room_width+1;
-                    this.topleft = bottomleft + ((room_height-1) * _floor_w);
-                    this.topright = topleft + room_width-1;
-                    writetext.WriteLine("Cell index is bottom right ");
-                }
-                else if (!_x_positive && !_z_positive)
-                {
-                    this.topright = _cell_index;
-                    this.topleft = topright - room_width+1;
-                    this.bottomleft = topleft - ((room_height-1) * _floor_w);
-                    this.bottomright = bottomleft + room_width-1;
-                    writetext.WriteLine("Cell index is top right ");
-
-                }
-                writetext.WriteLine("Cell index: "+_cell_index);
-                writetext.WriteLine("Top Left: "+topleft);
-                writetext.WriteLine("Top Right: "+topright);
-                writetext.WriteLine("Bottom Left: "+bottomleft);
-                writetext.WriteLine("Bottom Right: "+bottomright);
-                writetext.WriteLine("Room width: "+room_width);
-                writetext.WriteLine("Room height: "+room_height);
-                writetext.WriteLine("X positive: "+_x_positive);
-                writetext.WriteLine("Z positive: "+_z_positive);
-                writetext.WriteLine("Cells: ");
-
-                int index = 0;
-                for (int z = 0; z < room_height; z++)
-                {
-                    for (int x = 0; x < room_width; x++)
-                    {
-                        room_cells[index] = bottomleft + (z * _floor_w) + x;
-                        writetext.WriteLine(room_cells[index]);
-                        index++;
-                    }
-                }
-
-            }
-        }
-
-        public void changeMaterial(Tiles[] cells)
-        {
-            using (StreamWriter writetext = new StreamWriter("Debugs/room_cell_generation_mat_change.txt"))
-            {
-                for (int i = 0; i < room_cells.Length; i++)
-                {
-                    cells[room_cells[i]].changeMaterial();
-                }
-                cells[this.topleft]._corner();
-                cells[this.topright]._corner();
-                cells[this.bottomleft]._corner();
-                cells[this.bottomright]._corner();
-                cells[this.cell_index].cellindex();
-                writetext.WriteLine("Cell index: " + this.cell_index);
-                writetext.WriteLine("Top Left: " + this.topleft);
-                writetext.WriteLine("Top Right: " + this.topright);
-                writetext.WriteLine("Bottom Left: " + this.bottomleft);
-                writetext.WriteLine("Bottom Right: " + this.bottomright);
-            }
-        }
-    }
-
     public FloorGenerator(float _tile_size, int _grid_width, int _grid_height, float _cell_scale, int _index,GameObject _floor,GameObject _wall,int seed)
     {
         this.index = _index;
@@ -191,14 +84,14 @@ public class FloorGenerator
             }
         }
     }
-
-    public void generateRoom()
+     
+    public void generateRoom(int method)
     {
         // size 400
         // min 20
         // max 200
         System.Random rnd = new System.Random(this.seed);
-        int max_size_rooms=(int)(this.size/0.6);
+        int max_size_rooms=(int)(this.size/0.3);
         int current_size = 0;
         int tries = 200;
         int tried = 0;
@@ -217,9 +110,10 @@ public class FloorGenerator
                 cell_index = (int)(rnd.Next(0, (this.size+1)));
                 room_size = (int)(rnd.Next(this.min_room, this.max_room));
                 bool can_divided = true;
+                bool can_fit_byGrid = true;
+                bool can_fit_byMethod = false;
                 int room_dim_x = 0;
                 int room_dim_z = 0;
-                bool can_fit = true;
                 bool room_directionX_positive = true;
                 bool room_directionZ_positive = true;
                 
@@ -288,7 +182,7 @@ public class FloorGenerator
                         }
                         else
                         {
-                            can_fit = false;
+                            can_fit_byGrid = false;
                         }
 
 
@@ -301,28 +195,43 @@ public class FloorGenerator
                         }
                         else
                         {
-                            can_fit = false;
+                            can_fit_byGrid = false;
                         }
 
 
-                        if (can_fit)
+                        if (can_fit_byGrid)
                         {
-                            current_size += room_size;
-                            rooms.Add(new Room(room_size, room_width, room_height));
-                            rooms[created_rooms].generate(cell_index,room_directionX_positive,room_directionZ_positive,floor_width,floor_height,created_rooms);
-                            rooms[created_rooms].changeMaterial(cells);
-                            created_rooms++;
+                            if (method==2 || method==3)
+                            {
 
-                            writetext.WriteLine("Created rooms: " + created_rooms);
-                            writetext.WriteLine("Cell index: " + cell_index);
-                            writetext.WriteLine("Size: " + room_size + " Width: " + room_width + " Height: " + room_height);
-                            writetext.WriteLine("Room added");
-                        }
+                            }else if (method == 1)
+                            {
+                                can_fit_byMethod = true;
+                            }
+
+                            if (can_fit_byMethod)
+                            {
+                                current_size += room_size;
+                                rooms.Add(new Room(room_size, room_width, room_height));
+                                rooms[created_rooms].generate(cell_index, room_directionX_positive, room_directionZ_positive, floor_width, floor_height, created_rooms, cells);
+                                //rooms[created_rooms].changeMaterial(cells);
+                                created_rooms++;
+
+                                writetext.WriteLine("Created rooms: " + created_rooms);
+                                writetext.WriteLine("Cell index: " + cell_index);
+                                writetext.WriteLine("Size: " + room_size + " Width: " + room_width + " Height: " + room_height);
+                                writetext.WriteLine("Room added");
+                            }
+                            else
+                            {
+                                writetext.WriteLine("Can't fit by method");
+                            }
+
+                        } 
                         else
                         {
                             writetext.WriteLine("Can't fit into grid");
                         }
-
                     }
 
                 }
@@ -343,7 +252,7 @@ public class FloorGenerator
                 }
 
                 tried++;
-                if (minimum_created_rooms == created_rooms){ break; }
+                if (minimum_created_rooms == created_rooms){ writetext.WriteLine("Limit break"); break; }
             } while (tried!=tries);
 
             writetext.WriteLine("");

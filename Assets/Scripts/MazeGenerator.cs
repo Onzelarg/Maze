@@ -52,9 +52,9 @@ public class MazeGenerator : MonoBehaviour
         floors[0].clearGrid();
 
     }
-    public void generateRooms()
+    public void generateRooms(int method)
     {
-        floors[0].generateRoom();
+        floors[0].generateRoom(method);
     }
 
     public int update_data(int data,int index)
@@ -93,11 +93,18 @@ public class MazeGenerator : MonoBehaviour
         }
     }
 
+    public void room()
+    {
+        for (int i = 0; i < floors[0].rooms.Count; i++)
+        {
+            floors[0].rooms[i].changeMaterial(floors[0].cells);
+        }
+        
+    }
+
     public void room(int room)
     {
         floors[0].rooms[room].changeMaterial(floors[0].cells);
-
-
     }
 
 }

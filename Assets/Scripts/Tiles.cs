@@ -15,7 +15,7 @@ public class Tiles
     Vector3 left_right = new Vector3(0, 0, 90);    
     Vector3 front_back = new Vector3(90, 0, 0);    
     public int index;      
-    bool visited = false;
+    public bool visited = false;
     public Material visited_mat;
     public Material corner;
     public Material index_mat;
@@ -80,18 +80,11 @@ public class Tiles
 
     }
 
-    public void changeMaterial()
+    public void changeMaterial(Material mat)
     {
-        tile[0].GetComponent<Renderer>().material = visited_mat;
+        tile[0].GetComponent<Renderer>().material = mat;
     }
-    public void _corner()
-    {
-        tile[0].GetComponent<Renderer>().material = corner;
-    }
-    public void cellindex()
-    {
-        tile[0].GetComponent<Renderer>().material = index_mat;
-    }
+
     public void clear()
     {
         for (int i = 0; i < tile.Length; i++)
