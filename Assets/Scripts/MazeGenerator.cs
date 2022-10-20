@@ -54,7 +54,7 @@ public class MazeGenerator : MonoBehaviour
     }
     public void generateRooms(int method)
     {
-        floors[0].generateRoom(method);
+        floors[0].generateRoom(method,0.6f,200,30);
     }
 
     public int update_data(int data,int index)

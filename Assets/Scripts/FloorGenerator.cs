@@ -85,22 +85,24 @@ public class FloorGenerator
         }
     }
      
-    public void generateRoom(int method)
+    public void generateRoom(int method,float max_room_ratio,int tries, int minimum_created_rooms)
     {
         // size 400
         // min 20
         // max 200
+        int max_size_rooms = (int)(this.size / max_room_ratio);
+        //int tries = 200;
+        //int minimum_created_rooms = 30;
+
         System.Random rnd = new System.Random(this.seed);
-        int max_size_rooms=(int)(this.size/0.3);
         int current_size = 0;
-        int tries = 200;
         int tried = 0;
         int cell_index;
         int room_size;
         int room_width=0;
         int room_height=0;
         int created_rooms = 0;
-        int minimum_created_rooms = 30;
+        
 
         using (StreamWriter writetext = new StreamWriter("Debugs/room_generation.txt"))
         {
@@ -201,15 +203,28 @@ public class FloorGenerator
 
                         if (can_fit_byGrid)
                         {
-                            if (method==2 || method==3)
+                            if ((method==2 || method==3) && created_rooms != 0)
                             {
+                                rooms.Add(new Room(room_size, room_width, room_height));
+                                rooms[created_rooms].generate(cell_index, room_directionX_positive, room_directionZ_positive, floor_width, floor_height, created_rooms, cells);
 
-                            }else if (method == 1)
+                                if (method==2)
+                                {
+                                    can_fit_byMethod = rooms[created_rooms - 1].methodCheck(2, rooms[created_rooms]);
+                                }
+                                if (method == 3)
+                                {
+                                    can_fit_byMethod = rooms[created_rooms - 1].methodCheck(3, rooms[created_rooms]);
+                                }
+                                rooms.RemoveAt(rooms.Count - 1);
+
+                            }
+                            else if (method == 1)
                             {
                                 can_fit_byMethod = true;
                             }
 
-                            if (can_fit_byMethod)
+                            if (can_fit_byMethod || created_rooms==0)
                             {
                                 current_size += room_size;
                                 rooms.Add(new Room(room_size, room_width, room_height));

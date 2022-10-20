@@ -135,7 +135,7 @@ public class MazeGeneratorInspector : Editor
             merged = false;
             touch = false;
             method = 1;
-        }
+        } 
         else
         {
             overlap = false;
