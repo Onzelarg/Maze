@@ -21,6 +21,9 @@ public class MazeGenerator : MonoBehaviour
     public int floorSize;
     public int floorMin;
     public int floorMax;
+    [SerializeField] int tries;
+    [SerializeField] float max_room_ratio;
+    [SerializeField] int minimum_created_room;
 
     //left z-90 right z+90
     //front x+90 back x+90 
@@ -35,6 +38,9 @@ public class MazeGenerator : MonoBehaviour
         index = 0;
         floors = new FloorGenerator[10];
         visited = Resources.Load("Room") as Material;
+        tries = 200;
+        max_room_ratio = 0.6f;
+        minimum_created_room = 30;
         generate(12345678);
         //floors[0].generateRoom();
     }
@@ -54,7 +60,7 @@ public class MazeGenerator : MonoBehaviour
     }
     public void generateRooms(int method)
     {
-        floors[0].generateRoom(method,0.6f,200,30);
+        floors[0].generateRoom(method,max_room_ratio,tries,minimum_created_room);
     }
 
     public int update_data(int data,int index)

@@ -57,7 +57,8 @@ public class FloorGenerator
         }
         this.seed = _seed;
         cells = new Tiles[size];
-
+        int parent = 0;
+        GameObject parent_gameObject = new GameObject("Tiles: " + parent + " - " + (parent + 99));
 
         int cell_index = 0;
 
@@ -70,9 +71,15 @@ public class FloorGenerator
         {
             for (int j = 0; j < floor_width; j++)
             {
+                if (cell_index - parent > 99)
+                {
+                    parent += 100;
+                    parent_gameObject = new GameObject("Tiles: " + parent + " - " + (parent + 99));
+                }
                 Vector3 cell_position = new Vector3(j * tile_size, 0, i * tile_size);
 
                 cells[cell_index] = new Tiles(cell_position,  floor, cell_index, tile_scale);
+                cells[cell_index].tile[0].transform.parent = parent_gameObject.transform;
                 int[] sides = new int[4];
                 for (int k = 0; k < 4; k++)
                 {
@@ -93,6 +100,12 @@ public class FloorGenerator
         int max_size_rooms = (int)(this.size / max_room_ratio);
         //int tries = 200;
         //int minimum_created_rooms = 30;
+        DateTime now = DateTime.Now;
+        using (StreamWriter w = new StreamWriter("Debugs/method/room_cell_method.txt"))
+        {
+            
+            w.WriteLine(now.ToString("F"));
+        }
 
         System.Random rnd = new System.Random(this.seed);
         int current_size = 0;
@@ -102,28 +115,28 @@ public class FloorGenerator
         int room_width=0;
         int room_height=0;
         int created_rooms = 0;
-        
 
         using (StreamWriter writetext = new StreamWriter("Debugs/room_generation.txt"))
         {
-        
+            writetext.WriteLine(now.ToString("F"));
             do
             {
-                cell_index = (int)(rnd.Next(0, (this.size+1)));
+                cell_index = (int)(rnd.Next(0, (this.size-1)));
                 room_size = (int)(rnd.Next(this.min_room, this.max_room));
                 bool can_divided = true;
                 bool can_fit_byGrid = true;
-                bool can_fit_byMethod = false;
+                bool can_fit_byMethod = true;
                 int room_dim_x = 0;
                 int room_dim_z = 0;
                 bool room_directionX_positive = true;
                 bool room_directionZ_positive = true;
                 
-                writetext.WriteLine("");
+                
                 writetext.WriteLine("Tries: " + (tried+1));
                 writetext.WriteLine("Current Size: " + current_size);
                 writetext.WriteLine("Generated Size: " + room_size+" added: "+ (current_size+room_size));
 
+                 
                 if (current_size + room_size < max_size_rooms)
                 {
 
@@ -207,15 +220,20 @@ public class FloorGenerator
                             {
                                 rooms.Add(new Room(room_size, room_width, room_height));
                                 rooms[created_rooms].generate(cell_index, room_directionX_positive, room_directionZ_positive, floor_width, floor_height, created_rooms, cells);
-
-                                if (method==2)
+                                using (StreamWriter wt = File.AppendText("Debugs/method/room_cell_method.txt")) { wt.WriteLine(""); wt.Write("New Check for: "+rooms.Count); }
+                                
+                                int method_check = 0;
+                                do
                                 {
-                                    can_fit_byMethod = rooms[created_rooms - 1].methodCheck(2, rooms[created_rooms]);
-                                }
-                                if (method == 3)
-                                {
-                                    can_fit_byMethod = rooms[created_rooms - 1].methodCheck(3, rooms[created_rooms]);
-                                }
+                                    if (method == 2)
+                                    {
+                                        can_fit_byMethod = rooms[method_check].methodCheck(2, rooms[created_rooms],tile_size);
+                                    }
+                                    if (method == 3)
+                                    {
+                                        can_fit_byMethod = rooms[method_check].methodCheck(3, rooms[created_rooms], tile_size);
+                                    }
+                                } while (++method_check!=(created_rooms) && can_fit_byMethod);
                                 rooms.RemoveAt(rooms.Count - 1);
 
                             }

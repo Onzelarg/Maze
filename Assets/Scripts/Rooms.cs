@@ -77,26 +77,32 @@ public Room(int size, int w, int h)
             this.bottomright[2] = (int)(cells[this.bottomright[0]].z);
 
             writetext.WriteLine("Cell index: " + _cell_index);
-            writetext.WriteLine("Top Left: " + topleft[0]);
-            writetext.WriteLine("Top Right: " + topright[0]);
-            writetext.WriteLine("Bottom Left: " + bottomleft[0]);
-            writetext.WriteLine("Bottom Right: " + bottomright[0]);
+            writetext.WriteLine("Top Left: " + topleft[0]+" X: " + topleft[1] +" Z: " + topleft[2]);
+            writetext.WriteLine("Top Right: " + topright[0] + " X: " + topright[1] +" Z: " + topright[2]);
+            writetext.WriteLine("Bottom Left: " + bottomleft[0] + " X: " + bottomleft[1] +" Z: " + bottomleft[2]);
+            writetext.WriteLine("Bottom Right: " + bottomright[0] + " X: " + bottomright[1] +" Z: " + bottomright[2]);
             writetext.WriteLine("Room width: " + room_width);
             writetext.WriteLine("Room height: " + room_height);
             writetext.WriteLine("X positive: " + _x_positive);
             writetext.WriteLine("Z positive: " + _z_positive);
             writetext.WriteLine("Cells: ");
+            setMaterial(_floor_w,cells,created_rooms,writetext);
+            
+        }
+    }
 
+    void setMaterial(int _floor_w, Tiles[] cells, int created_rooms,StreamWriter wt)
+    {
             int index = 0;
             for (int z = 0; z < room_height; z++)
             {
                 for (int x = 0; x < room_width; x++)
                 {
-                    if ((bottomleft[0] + (z * _floor_w) + x)==cell_index)
+                    if ((bottomleft[0] + (z * _floor_w) + x) == cell_index)
                     {
                         room_cells[(bottomleft[0] + (z * _floor_w) + x)] = Resources.Load("Index") as Material;
                     }
-                    else if (z == 0 || z==room_height-1 || x==0 || x==room_width-1)
+                    else if (z == 0 || z == room_height - 1 || x == 0 || x == room_width - 1)
                     {
                         room_cells[(bottomleft[0] + (z * _floor_w) + x)] = Resources.Load("Corner") as Material;
                     }
@@ -105,11 +111,9 @@ public Room(int size, int w, int h)
                         room_cells[(bottomleft[0] + (z * _floor_w) + x)] = Resources.Load("Room") as Material;
                     }
                     cells[(bottomleft[0] + (z * _floor_w) + x)].visited = true;
-                    writetext.WriteLine(room_cells.ElementAt(index).Key);
+                    wt.WriteLine(room_cells.ElementAt(index).Key);
                     index++;
-                }
             }
-
         }
     }
 
@@ -128,26 +132,43 @@ public Room(int size, int w, int h)
             writetext.WriteLine("Bottom Left: " + this.bottomleft[0]);
             writetext.WriteLine("Bottom Right: " + this.bottomright[0]);
         }
-    }
+    } 
 
-    public bool methodCheck(int method,Room other)
+    public bool methodCheck(int method,Room other,float tilesize)
     {
-        if (method == 2)
+        using (StreamWriter writetext = File.AppendText("Debugs/method/room_cell_method.txt"))
         {
-            if (this.topleft[1] >= other.bottomright[1] || this.topleft[2] <= other.bottomright[2] || this.bottomright[1] <= other.topleft[1] || this.bottomright[2] >= other.topleft[2])
-            {
-                return true;
-            }
-        }
 
-        if (method == 3)
-        {
-            if (this.topleft[1] > other.bottomright[1] || this.topleft[2] < other.bottomright[2] || this.bottomright[1] < other.topleft[1] || this.bottomright[2] > other.topleft[2])
+            writetext.WriteLine("");
+            writetext.Write("This index: " + this.cell_index + " Other index:" + other.cell_index + " TTL X: " + this.topleft[1] + " TTL Y: " + this.topleft[2]);
+            writetext.Write(" OTL X: " + other.topleft[1] + " OTL Y: " + other.topleft[2]);
+            writetext.Write(" TBR X: " + this.bottomright[1] + " TBR Y: " + this.bottomright[2]);
+            writetext.Write(" OBR X: " + other.bottomright[1] + " OBR Y: " + other.bottomright[2]);
+            
+            
+            int offset = (int)(tilesize);
+            if (method == 2)
             {
-                return true;
+                if (this.topleft[1] >= (other.bottomright[1] + offset) || this.bottomright[1] <= (other.topleft[1] - offset) || this.topleft[2] <= (other.bottomright[2] - offset) || this.bottomright[2] >= (other.topleft[2] + offset))
+                {
+                    writetext.Write(" true");
+                    return true;
+                }
             }
+              
+            if (method == 3)
+            {
+                offset = offset*2;
+                if (this.topleft[1] > (other.bottomright[1] + offset) || this.bottomright[1] < (other.topleft[1] - offset) || this.topleft[2] < (other.bottomright[2] - offset) || this.bottomright[2] > (other.topleft[2] + offset))
+                { 
+                    writetext.Write(" true");
+                    return true;
+                }
+            }
+
+            writetext.Write(" false");
+            return false;
         }
-        return false;
     }
 
 }
