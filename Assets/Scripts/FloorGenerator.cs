@@ -35,6 +35,7 @@ public class FloorGenerator
         this.wall = _wall;
         this.min_room = (int)(this.size * 0.05);
         this.max_room = (int)(this.size * 0.5);
+        Variables.updateVar(_tile_size,_cell_scale,_grid_height,_grid_width);
 
         generateGrid(seed);
 
@@ -44,7 +45,7 @@ public class FloorGenerator
     {
         for (int i = 0; i < cells.Length; i++)
         {
-            cells[i].clear();
+            cells[i].clearAll();
         }
         cells = new Tiles[0];
     }
@@ -78,14 +79,15 @@ public class FloorGenerator
                 }
                 Vector3 cell_position = new Vector3(j * tile_size, 0, i * tile_size);
 
-                cells[cell_index] = new Tiles(cell_position,  floor, cell_index, tile_scale);
+                cells[cell_index] = new Tiles(cell_position,cell_index);
                 cells[cell_index].tile[0].transform.parent = parent_gameObject.transform;
-                int[] sides = new int[4];
-                for (int k = 0; k < 4; k++)
-                {
-                    sides[k]= (int)(rnd.Next(0, 2));
-                }
-                //cells[cell_index].generateSide(sides,wall,tile_size,tile_scale);
+
+                //int[] sides = new int[4];
+                //for (int k = 0; k < 4; k++)
+                //{
+                //    sides[k]= (int)(rnd.Next(0, 2));
+                //}
+                ////cells[cell_index].generateSide(sides,wall,tile_size,tile_scale);
 
                 cell_index++;
             }
@@ -219,7 +221,7 @@ public class FloorGenerator
                             if ((method==2 || method==3) && created_rooms != 0)
                             {
                                 rooms.Add(new Room(room_size, room_width, room_height));
-                                rooms[created_rooms].generate(cell_index, room_directionX_positive, room_directionZ_positive, floor_width, floor_height, created_rooms, cells);
+                                rooms[created_rooms].generate(cell_index, room_directionX_positive, room_directionZ_positive, created_rooms, cells);
                                 using (StreamWriter wt = File.AppendText("Debugs/method/room_cell_method.txt")) { wt.WriteLine(""); wt.Write("New Check for: "+rooms.Count); }
                                 
                                 int method_check = 0;
@@ -246,7 +248,8 @@ public class FloorGenerator
                             {
                                 current_size += room_size;
                                 rooms.Add(new Room(room_size, room_width, room_height));
-                                rooms[created_rooms].generate(cell_index, room_directionX_positive, room_directionZ_positive, floor_width, floor_height, created_rooms, cells);
+                                rooms[created_rooms].generate(cell_index, room_directionX_positive, room_directionZ_positive, created_rooms, cells);
+                                rooms[created_rooms].setMaterial(floor_width,cells, writetext);
                                 //rooms[created_rooms].changeMaterial(cells);
                                 created_rooms++;
 

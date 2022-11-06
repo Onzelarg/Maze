@@ -221,6 +221,10 @@ public class MazeGeneratorInspector : Editor
         {
             _mazeGenerator.room();
         }
+        if (GUILayout.Button("clear"))
+        {
+            _mazeGenerator.cleartile();
+        }
         GUILayout.EndHorizontal();
 
         // GUILayout.BeginHorizontal();

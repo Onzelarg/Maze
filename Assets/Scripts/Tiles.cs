@@ -20,7 +20,7 @@ public class Tiles
     public Material corner;
     public Material index_mat;
 
-    public Tiles(Vector3 position,GameObject _floor,int _index,float _cell_scale)
+    public Tiles(Vector3 position,int _index)
     {
         this.x = position.x;
         this.z = position.z;
@@ -28,15 +28,17 @@ public class Tiles
         visited_mat = Resources.Load("Room") as Material;
         corner = Resources.Load("Corner") as Material;
         index_mat = Resources.Load("Index") as Material;
-        generateCell(_floor,_cell_scale);
+        generateCell();
     }
 
-    void generateCell(GameObject _floor,float _cell_scale)
+    void generateCell()
     {
+        GameObject floor = Resources.Load("floor") as GameObject;
         tile = new GameObject[5];
-        tile[0] = UnityEngine.Object.Instantiate(_floor, new Vector3(this.x,0,this.z), new Quaternion());
+        tile[0] = UnityEngine.Object.Instantiate(floor, new Vector3(this.x,0,this.z), new Quaternion());
         tile[0].name = "Tile " + (int)(index);
-        tile[0].transform.localScale = new Vector3(_cell_scale, 1, _cell_scale);
+        //tile[0].transform.localScale = new Vector3(2, 1, 2);
+        tile[0].transform.localScale = new Vector3(Variables.tile_scale, 1, Variables.tile_scale);
     }
 
     public void generateSide(int[] _side,GameObject _wall,float _tile_size, float _cell_scale)
@@ -55,6 +57,7 @@ public class Tiles
             tile[1].transform.Rotate(left_right);
             tile[1].name = "Wall " + (int)(index + 1) + " left";
             tile[1].transform.localScale = new Vector3(_cell_scale * 10, wall_size, _cell_scale * 10);
+            tile[1].transform.parent = tile[0].transform;
         }
         if (side[1] == 1)
         {
@@ -62,6 +65,7 @@ public class Tiles
             tile[2].transform.Rotate(left_right);
             tile[2].name = "Wall " + (int)(index + 1) + " right";
             tile[2].transform.localScale = new Vector3(_cell_scale * 10, wall_size, _cell_scale * 10);
+            tile[2].transform.parent = tile[0].transform;
         }
         if (side[2] == 1)
         {
@@ -69,6 +73,7 @@ public class Tiles
             tile[3].transform.Rotate(front_back);
             tile[3].name = "Wall " + (int)(index + 1) + " front";
             tile[3].transform.localScale = new Vector3(_cell_scale * 10, wall_size, _cell_scale * 10);
+            tile[3].transform.parent = tile[0].transform;
         }
         if (side[3] == 1)
         {
@@ -76,6 +81,7 @@ public class Tiles
             tile[4].transform.Rotate(front_back);
             tile[4].name = "Wall " + (int)(index + 1) + " back";
             tile[4].transform.localScale = new Vector3(_cell_scale * 10, wall_size, _cell_scale * 10);
+            tile[4].transform.parent = tile[0].transform;
         }
 
     }
@@ -85,13 +91,21 @@ public class Tiles
         tile[0].GetComponent<Renderer>().material = mat;
     }
 
-    public void clear()
+    public void clearAll()
     {
         for (int i = 0; i < tile.Length; i++)
         {
             UnityEngine.Object.Destroy(tile[i]);
         }
 
+    }
+     
+    public void clearWalls()
+    {
+        for (int i = 1; i < tile.Length; i++)
+        {
+            UnityEngine.Object.Destroy(tile[i]);
+        }
     }
 
 }

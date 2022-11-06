@@ -34,7 +34,7 @@ public class MazeGenerator : MonoBehaviour
         tile_size = 15f;
         grid_width = 20;
         grid_height = 20;
-        cell_scale = 2f;
+        cell_scale = 1.5f;
         index = 0;
         floors = new FloorGenerator[10];
         visited = Resources.Load("Room") as Material;
@@ -94,7 +94,7 @@ public class MazeGenerator : MonoBehaviour
     {
         if (_cell_index.Split(" ")[0]=="Tile")
         {
-            int cell_index = Convert.ToInt32(_cell_index.Split(" ")[1]) - 1;
+            int cell_index = Convert.ToInt32(_cell_index.Split(" ")[1]);
             floors[0].cells[cell_index].tile[0].GetComponent<Renderer>().material = visited;
         }
     }
@@ -111,6 +111,14 @@ public class MazeGenerator : MonoBehaviour
     public void room(int room)
     {
         floors[0].rooms[room].changeMaterial(floors[0].cells);
+    }
+    public void cleartile()
+    {
+        for (int i = 0; i < 50; i++)
+        {
+            floors[0].cells[i].clearWalls();
+        }
+        
     }
 
 }
