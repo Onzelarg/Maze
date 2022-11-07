@@ -249,7 +249,16 @@ public class FloorGenerator
                                 current_size += room_size;
                                 rooms.Add(new Room(room_size, room_width, room_height));
                                 rooms[created_rooms].generate(cell_index, room_directionX_positive, room_directionZ_positive, created_rooms, cells);
-                                rooms[created_rooms].setMaterial(floor_width,cells, writetext);
+                                rooms[created_rooms].setMaterial(floor_width,cells,created_rooms);
+                                if (method==1 && created_rooms!=0)
+                                {
+                                    for (int i = 0; i < created_rooms-1; i++)
+                                    {
+                                        rooms[created_rooms].mergeTiles(rooms[i]);
+                                    }
+                                    
+                                }
+                                rooms[created_rooms].setTileSides(cells);
                                 //rooms[created_rooms].changeMaterial(cells);
                                 created_rooms++;
 
