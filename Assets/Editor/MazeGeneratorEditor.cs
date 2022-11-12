@@ -19,7 +19,7 @@ public class MazeGeneratorInspector : Editor
     int min_f;
     int max_f;
     int cell_quantity;
-    int[] side=new int[4];
+    int[] side=new int[8];
     int seed = 12345678;
     string _seed = "12345678";
     string _room = "0";
@@ -27,6 +27,9 @@ public class MazeGeneratorInspector : Editor
     bool overlap = true;
     bool merged = false;
     bool touch = false;
+    string room_id = "0";
+    float min = 0.05f;
+    float max = 0.5f;
 
     char[] letterIndex = { 'A','a','B','b','C','c','D','d','E','e','F','f','G','g','H','h','I','i','J',
         'j','K','k','L','l','M','m','N','n','O','o','P','p','Q','q','R','r','S','s','T','t','U','u','V',
@@ -73,7 +76,8 @@ public class MazeGeneratorInspector : Editor
         {
             _mazeGenerator.clear();
             seed = returnSeed(_seed);
-            _mazeGenerator.generate(seed);
+            
+            _mazeGenerator.generate(seed,min,max);
 
         }
 
@@ -81,8 +85,11 @@ public class MazeGeneratorInspector : Editor
         {
             _mazeGenerator.clear();
         }
+        if (GUILayout.Button("ClearNV"))
+        {
+            _mazeGenerator.clearNotvisited();
+        }
 
-       
 
         /*
         if (GUILayout.Button("ClearW"))
@@ -122,11 +129,26 @@ public class MazeGeneratorInspector : Editor
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();
+
+            GUILayout.Label("Min");
+             min = EditorGUILayout.FloatField(min);
+
+            GUILayout.Label("Max");
+            max = EditorGUILayout.FloatField(max);
+
+        GUILayout.EndHorizontal();
+
+        GUILayout.BeginHorizontal();
        
         if (GUILayout.Button("Room Gen"))
         {
             _mazeGenerator.generateRooms(method);
 
+        }
+        if (GUILayout.Button("Room G_all"))
+        {
+            _mazeGenerator.generateRooms(method);
+            _mazeGenerator.room();
         }
         GUILayout.Label("Overlap: ");
         if (EditorGUILayout.Toggle(overlap))
@@ -198,10 +220,10 @@ public class MazeGeneratorInspector : Editor
             //right    //2  1
             //front    //3  2
             //back     //4  3
-            GUILayout.Label("Left " + side[0]);
-            GUILayout.Label("Right " + side[1]);
-            GUILayout.Label("Front " + side[2]);
-            GUILayout.Label("Back " + side[3]);
+            GUILayout.Label("Left " + side[0]+" : " + side[4]);
+            GUILayout.Label("Right " + side[1] + " : " + side[5]);
+            GUILayout.Label("Front " + side[2] + " : " + side[6]);
+            GUILayout.Label("Back " + side[3] + " : " + side[7]);
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();
@@ -224,10 +246,23 @@ public class MazeGeneratorInspector : Editor
       
         GUILayout.EndHorizontal();
 
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Room Index");
+        room_id = GUILayout.TextField(room_id, 2);
+
+        if (GUILayout.Button("Room cek"))
+        {
+            _mazeGenerator.roomCek(Convert.ToInt32(room_id));
+        }
+
+
+        GUILayout.EndHorizontal();
+
+
         // GUILayout.BeginHorizontal();
         // GUILayout.EndHorizontal();
     }
 
-    
+
 
 }

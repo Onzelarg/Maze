@@ -22,11 +22,13 @@ public class Room
     public int cell_index;
     public int connected_room_index;
     public int room_index;
+    float uniqueness = 1f;
 
     public class room_cell
     {
         public Material material;
-        public string type { get; set; }
+        public bool inside = true;
+        public int[] sides = new int[] { 0, 0, 0, 0 };
     }
 
     public struct corner_cell
@@ -169,53 +171,63 @@ public class Room
                     if ((corner_cells[2].index + (z * _floor_w) + x) == cell_index)
                     {
                         cell.material = Resources.Load("Index") as Material;
+                        cell.inside = false;
                     }
                     else if (z == 0 || z == room_height - 1 || x == 0 || x == room_width - 1)
                     {
                         cell.material = Resources.Load("Corner") as Material;
-                        cell.type = "corner";
+                        cell.inside = false;
                     }
                     else
                     {
                         cell.material = Resources.Load("Room") as Material;
-                        cell.type = "inside";
                     }
                     // Sides
                     if (z == 0 && (x != 0 && x != room_width - 1))
                     {
                         this.bottom_cells.Add((corner_cells[2].index + (z * _floor_w) + x));
-                        cell.type = "side";
+                        cell.inside = false;
+                        cell.sides = new int[] { 0, 0, 1, 0 };
                     }
 
                     if (z == room_height - 1 && (x != 0 && x != room_width - 1))
                     {
                         this.top_cells.Add((corner_cells[2].index + (z * _floor_w) + x));
-                        cell.type = "side";
+                        cell.inside = false;
+                        cell.sides = new int[] { 0, 0, 0, 1 };
                     }
 
                     if (x == 0 && (z != 0 && z != room_height - 1))
                     {
                         this.left_cells.Add((corner_cells[2].index + (z * _floor_w) + x));
-                        cell.type = "side";
+                        cell.inside = false;
+                        cell.sides = new int[] { 1, 0, 0, 0 };
                     }
 
                     if (x == room_width - 1 && (z != 0 && z != room_height - 1))
                     {
                         this.right_cells.Add((corner_cells[2].index + (z * _floor_w) + x));
-                        cell.type = "side";
+                        cell.inside = false;
+                        cell.sides = new int[] { 0, 1, 0, 0 };
                     }
 
                     room_cells[(corner_cells[2].index + (z * _floor_w) + x)] = cell;
-                    cells[(corner_cells[2].index + (z * _floor_w) + x)].visited = true;
                     wt.Write(room_cells.ElementAt(index).Key);
                     wt.WriteLine(" : " + room_cells.ElementAt(index).Value.material);
                     index++;
                 }
             }
+
+            room_cells[corner_cells[0].index].sides = new int[] { 1, 0, 0, 1 };
+            room_cells[corner_cells[1].index].sides = new int[] { 0, 1, 0, 1 };
+            room_cells[corner_cells[2].index].sides = new int[] { 1, 0, 1, 0 };
+            room_cells[corner_cells[3].index].sides = new int[] { 0, 1, 1, 0 };
+
             wt.WriteLine("Corner Cells: (" + corner_cells.Length + ")");
             for (int i = 0; i < corner_cells.Length; i++)
             {
                 wt.WriteLine(corner_cells[i].index);
+                
             }
             wt.WriteLine("Left Cells: (" + left_cells.Count + ")");
             for (int i = 0; i < left_cells.Count; i++)
@@ -242,83 +254,14 @@ public class Room
 
     public void setTileSides(Tiles[] cells)
     {
-        int[] sides = new int[4];
         GameObject wall = Resources.Load("Wall", typeof(GameObject)) as GameObject;
-
         for (int i = 0; i < room_cells.Count; i++)
         {
-            if (room_cells.ElementAt(i).Value.type == "inside")
+            if (!room_cells.ElementAt(i).Value.inside)
             {
-                sides = new int[] { 0, 0, 0, 0 };
-                cells[room_cells.ElementAt(i).Key].generateSide(sides, wall, Variables.tile_size, Variables.tile_scale);
+                cells[room_cells.ElementAt(i).Key].generateSide(room_cells.ElementAt(i).Value.sides, wall);
             }
         }
-
-        //left     //1
-
-        for (int i = 0; i < left_cells.Count; i++)
-        {
-            if (room_cells[left_cells[i]].type != "inside")
-            {
-                sides = new int[] { 1, 0, 0, 0 };
-                cells[left_cells[i]].generateSide(sides, wall, Variables.tile_size, Variables.tile_scale);
-            }
-            else
-            {
-                sides = new int[] { 0, 0, 0, 0 };
-                cells[left_cells[i]].generateSide(sides, wall, Variables.tile_size, Variables.tile_scale);
-            }
-        }
-        //right    //2
-
-        for (int i = 0; i < right_cells.Count; i++)
-        {
-            if (room_cells[right_cells[i]].type != "inside")
-            {
-                sides = new int[] { 0, 1, 0, 0 };
-                cells[right_cells[i]].generateSide(sides, wall, Variables.tile_size, Variables.tile_scale);
-            }
-            else
-            {
-                sides = new int[] { 0, 0, 0, 0 };
-                cells[right_cells[i]].generateSide(sides, wall, Variables.tile_size, Variables.tile_scale);
-            }
-        }
-        //front    //3
-
-        for (int i = 0; i < top_cells.Count; i++)
-        {
-            if (room_cells[top_cells[i]].type != "inside")
-            {
-                sides = new int[] { 0, 0, 0, 1 };
-                cells[top_cells[i]].generateSide(sides, wall, Variables.tile_size, Variables.tile_scale);
-            }
-            else
-            {
-                sides = new int[] { 0, 0, 0, 0 };
-                cells[top_cells[i]].generateSide(sides, wall, Variables.tile_size, Variables.tile_scale);
-            }
-        }
-        //back     //4
-
-        for (int i = 0; i < bottom_cells.Count; i++)
-        {
-            if (room_cells[bottom_cells[i]].type != "inside")
-            {
-                sides = new int[] { 0, 0, 1, 0 };
-                cells[bottom_cells[i]].generateSide(sides, wall, Variables.tile_size, Variables.tile_scale);
-            }
-            else
-            {
-                sides = new int[] { 0, 0, 0, 0 };
-                cells[bottom_cells[i]].generateSide(sides, wall, Variables.tile_size, Variables.tile_scale);
-            }
-        }
-        //TL TR BL BR
-        cells[corner_cells[0].index].generateSide(new int[] { 1, 0, 0, 1 }, wall, Variables.tile_size, Variables.tile_scale);
-        cells[corner_cells[1].index].generateSide(new int[] { 0, 1, 0, 1 }, wall, Variables.tile_size, Variables.tile_scale);
-        cells[corner_cells[2].index].generateSide(new int[] { 1, 0, 1, 0 }, wall, Variables.tile_size, Variables.tile_scale);
-        cells[corner_cells[3].index].generateSide(new int[] { 0, 1, 1, 0 }, wall, Variables.tile_size, Variables.tile_scale);
     }
 
     public void changeMaterial(Tiles[] cells)
@@ -328,6 +271,26 @@ public class Room
 
             cells[room_cells.ElementAt(i).Key].changeMaterial(room_cells.ElementAt(i).Value.material);
         }
+    }
+
+    public void cekMAt(Tiles[] cells)
+    {
+        Material material= Resources.Load("cek") as Material;
+        Color color = Color.white;
+
+        int unixTime = (int)(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+        System.Random random = new System.Random(unixTime);
+        
+        color.r = (float)random.NextDouble();
+        color.g = (float)random.NextDouble();
+        color.b = (float)random.NextDouble();
+        material.color = color;
+        for (int i = 0; i < (room_cells.Count); i++)
+        {
+
+            cells[room_cells.ElementAt(i).Key].changeMaterial(material);
+        }
+
     }
 
     public bool methodCheck(int method, Room other, float tilesize)
@@ -367,58 +330,81 @@ public class Room
         }
     }
 
-    public void mergeTiles(Room other)
+    public bool mergeTiles(Room other,int counter,int room_id,int oroom_id)
     {
         DateTime now = DateTime.Now;
 
-        using (StreamWriter wt = new StreamWriter("Debugs/merged_mat/before " + cell_index +" : "+now.ToString("F")+ ".txt"))
+        using (StreamWriter wt = new StreamWriter("Debugs/merged_mat/before " + counter +" .txt"))
         {
-            wt.WriteLine("This room: ");
+            wt.WriteLine("This room: "+cell_index+" room id: "+room_id);
             wt.WriteLine(" ");
             for (int i = 0; i < room_cells.Count; i++)
             {
-                wt.WriteLine("Cell index: " + room_cells.ElementAt(i).Key + " type: " + room_cells.ElementAt(i).Value.type);
+                wt.WriteLine("Cell index: " + room_cells.ElementAt(i).Key + " type: ");
+                if (room_cells.ElementAt(i).Value.inside)
+                {
+                    wt.Write("inside ");
+                }
+                else
+                {
+                    wt.Write("not inside ");
+                }
             }
-            wt.WriteLine("Other room: ");
+            wt.WriteLine("Other room: "+other.cell_index + " room id: " + oroom_id);
             wt.WriteLine(" ");
             for (int i = 0; i < other.room_cells.Count; i++)
             {
-                wt.WriteLine("Cell index: " + other.room_cells.ElementAt(i).Key + " type: " + other.room_cells.ElementAt(i).Value.type);
+                wt.WriteLine("Cell index: " + other.room_cells.ElementAt(i).Key + " type: ");
+                if (other.room_cells.ElementAt(i).Value.inside)
+                {
+                    wt.Write("inside ");
+                }
+                else
+                {
+                    wt.Write("not inside ");
+                }
             }
-        }
+            wt.WriteLine("Changing: ");
             for (int i = 0; i < room_cells.Count; i++)
             {
                 for (int j = 0; j < other.room_cells.Count; j++)
                 {
                     if (room_cells.ElementAt(i).Key == other.room_cells.ElementAt(j).Key)
                     {
-                        if (room_cells.ElementAt(i).Value.type == "side" || room_cells.ElementAt(i).Value.type == "corner")
+                        uniqueness -= (1f / this.room_cells.Count);
+                        wt.WriteLine(uniqueness);
+                        if (uniqueness<0.7f)
                         {
-                            room_cells.ElementAt(i).Value.type = "inside";
-                            room_cells.ElementAt(i).Value.material = Resources.Load("Room") as Material;
+                            wt.WriteLine("Not unique enough!");
+                            return false;
                         }
-                        if (other.room_cells.ElementAt(j).Value.type == "side" || other.room_cells.ElementAt(j).Value.type == "corner")
+                        if (!room_cells.ElementAt(i).Value.inside)
                         {
-                            other.room_cells.ElementAt(j).Value.type = "inside";
+                            room_cells.ElementAt(i).Value.inside = true;
+                            room_cells.ElementAt(i).Value.material = Resources.Load("Room") as Material;
+                            wt.WriteLine("This: id: " + room_cells.ElementAt(i).Key + " type: inside");
+                        }
+                        if (!other.room_cells.ElementAt(j).Value.inside)
+                        {
+                            other.room_cells.ElementAt(j).Value.inside = true;
                             other.room_cells.ElementAt(j).Value.material = Resources.Load("Room") as Material;
+                            wt.WriteLine("Other: id: " + other.room_cells.ElementAt(j).Key + " type: inside");
                         }
                     }
                 }
             }
-            using (StreamWriter wt = new StreamWriter("Debugs/merged_mat/after " + cell_index + " : " + now.ToString("F") + ".txt"))
-            {
-                wt.WriteLine("This room: ");
-                wt.WriteLine(" ");
-                for (int i = 0; i < room_cells.Count; i++)
-                {
-                    wt.WriteLine("Cell index: " + room_cells.ElementAt(i).Key + " type: " + room_cells.ElementAt(i).Value.type);
-                }
-                wt.WriteLine("Other room: ");
-                wt.WriteLine(" ");
-                for (int i = 0; i < other.room_cells.Count; i++)
-                {
-                    wt.WriteLine("Cell index: " + other.room_cells.ElementAt(i).Key + " type: " + other.room_cells.ElementAt(i).Value.type);
-                }
-            }
         }
+        return true;
+    }
+
+    public void setVisited(Tiles[] cell)
+    {
+        for (int i = 0; i < room_cells.Count; i++)
+        {
+            cell[room_cells.ElementAt(i).Key].visited = true;
+        }
+
+    }
+
+
 }

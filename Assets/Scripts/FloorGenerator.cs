@@ -5,6 +5,7 @@ using System;
 using System.Reflection;
 using UnityEngine.UIElements;
 using System.IO;
+using System.Diagnostics;
 
 public class FloorGenerator
 {
@@ -20,10 +21,11 @@ public class FloorGenerator
     float tile_scale;
     GameObject floor;
     GameObject wall;
+    List<GameObject> tile_parents = new List<GameObject>();
     int seed;
     public List<Room> rooms=new List<Room>();
 
-    public FloorGenerator(float _tile_size, int _grid_width, int _grid_height, float _cell_scale, int _index,GameObject _floor,GameObject _wall,int seed)
+    public FloorGenerator(float _tile_size, int _grid_width, int _grid_height, float _cell_scale, int _index,GameObject _floor,GameObject _wall,int seed,float min_room_multiplier,float max_room_multiplier)
     {
         this.index = _index;
         this.floor_height = _grid_height;
@@ -33,8 +35,8 @@ public class FloorGenerator
         this.size = _grid_height * _grid_width;
         this.floor = _floor;
         this.wall = _wall;
-        this.min_room = (int)(this.size * 0.05);
-        this.max_room = (int)(this.size * 0.5);
+        this.min_room = (int)(this.size * min_room_multiplier);
+        this.max_room = (int)(this.size * max_room_multiplier);
         Variables.updateVar(_tile_size,_cell_scale,_grid_height,_grid_width);
 
         generateGrid(seed);
@@ -48,6 +50,22 @@ public class FloorGenerator
             cells[i].clearAll();
         }
         cells = new Tiles[0];
+        for (int i = 0; i < tile_parents.Count; i++)
+        {
+            UnityEngine.Object.Destroy(tile_parents[i]);
+        }
+    }
+
+    public void clearNotvisited()
+    {
+        for (int i = 0; i < cells.Length; i++)
+        {
+            if (!cells[i].visited)
+            {
+                cells[i].clearAll();
+            }
+            
+        }
     }
 
     public void generateGrid(int _seed)
@@ -60,6 +78,7 @@ public class FloorGenerator
         cells = new Tiles[size];
         int parent = 0;
         GameObject parent_gameObject = new GameObject("Tiles: " + parent + " - " + (parent + 99));
+        tile_parents.Add(parent_gameObject);
 
         int cell_index = 0;
 
@@ -76,6 +95,7 @@ public class FloorGenerator
                 {
                     parent += 100;
                     parent_gameObject = new GameObject("Tiles: " + parent + " - " + (parent + 99));
+                    tile_parents.Add(parent_gameObject);
                 }
                 Vector3 cell_position = new Vector3(j * tile_size, 0, i * tile_size);
 
@@ -93,21 +113,20 @@ public class FloorGenerator
             }
         }
     }
-     
+      
     public void generateRoom(int method,float max_room_ratio,int tries, int minimum_created_rooms)
     {
         // size 400
         // min 20
         // max 200
-        int max_size_rooms = (int)(this.size / max_room_ratio);
+        int max_size_rooms = (int)(this.size * max_room_ratio);
         //int tries = 200;
         //int minimum_created_rooms = 30;
+
+        Stopwatch operation = new Stopwatch();
+        operation.Start();
+
         DateTime now = DateTime.Now;
-        using (StreamWriter w = new StreamWriter("Debugs/method/room_cell_method.txt"))
-        {
-            
-            w.WriteLine(now.ToString("F"));
-        }
 
         System.Random rnd = new System.Random(this.seed);
         int current_size = 0;
@@ -117,10 +136,18 @@ public class FloorGenerator
         int room_width=0;
         int room_height=0;
         int created_rooms = 0;
+        int cant_divided = 0;
+        int cant_fit = 0;
+        int cant_fit_method = 0;
+        int too_big = 0;
+        int not_unique = 0;
+        int counter = 0;
+        string output = "";
 
         using (StreamWriter writetext = new StreamWriter("Debugs/room_generation.txt"))
         {
             writetext.WriteLine(now.ToString("F"));
+            output += now.ToString("F");
             do
             {
                 cell_index = (int)(rnd.Next(0, (this.size-1)));
@@ -128,6 +155,7 @@ public class FloorGenerator
                 bool can_divided = true;
                 bool can_fit_byGrid = true;
                 bool can_fit_byMethod = true;
+                bool is_unique = true;
                 int room_dim_x = 0;
                 int room_dim_z = 0;
                 bool room_directionX_positive = true;
@@ -141,7 +169,7 @@ public class FloorGenerator
                  
                 if (current_size + room_size < max_size_rooms)
                 {
-
+                    //2 3 5	7 11 13	17 19 23 29	31 37 41 43 47 53 59 61 67 71
                     if (room_size % 11 == 0)
                     {
                         room_width = 11;
@@ -170,7 +198,8 @@ public class FloorGenerator
                     else
                     {
                         can_divided = false;
-                        writetext.WriteLine("Can't be divided");  
+                        writetext.WriteLine("Can't be divided");
+                        cant_divided++;
                     }
 
                     if (can_divided)
@@ -246,21 +275,39 @@ public class FloorGenerator
 
                             if (can_fit_byMethod || created_rooms==0)
                             {
-                                current_size += room_size;
                                 rooms.Add(new Room(room_size, room_width, room_height));
                                 rooms[created_rooms].generate(cell_index, room_directionX_positive, room_directionZ_positive, created_rooms, cells);
-                                rooms[created_rooms].setMaterial(floor_width,cells,created_rooms);
+                                rooms[created_rooms].setMaterial(floor_width, cells, created_rooms);
                                 if (method==1 && created_rooms!=0)
                                 {
-                                    for (int i = 0; i < created_rooms-1; i++)
+                                    for (int i = 0; i < created_rooms; i++)
                                     {
-                                        rooms[created_rooms].mergeTiles(rooms[i]);
+                                        is_unique=rooms[created_rooms].mergeTiles(rooms[i],counter++,created_rooms,i);
+                                        if (!is_unique)
+                                        {
+                                            not_unique++;
+                                            break;
+                                        }
                                     }
-                                    
+                                     
                                 }
-                                rooms[created_rooms].setTileSides(cells);
+                                if (method!=1)
+                                {
+                                    rooms[created_rooms].setTileSides(cells);
+                                }
+
                                 //rooms[created_rooms].changeMaterial(cells);
-                                created_rooms++;
+                                if (is_unique)
+                                {
+                                    
+                                    current_size += room_size;
+                                    created_rooms++;
+                                }
+                                else
+                                {
+                                    rooms.RemoveAt(rooms.Count - 1);
+                                }
+                                
 
                                 writetext.WriteLine("Created rooms: " + created_rooms);
                                 writetext.WriteLine("Cell index: " + cell_index);
@@ -270,12 +317,14 @@ public class FloorGenerator
                             else
                             {
                                 writetext.WriteLine("Can't fit by method");
+                                cant_fit_method++;
                             }
 
                         } 
                         else
                         {
                             writetext.WriteLine("Can't fit into grid");
+                            cant_fit++;
                         }
                     }
 
@@ -283,6 +332,7 @@ public class FloorGenerator
                 else
                 {
                     writetext.WriteLine("Room too big");
+                    too_big++;
                 }
 
 
@@ -299,10 +349,39 @@ public class FloorGenerator
                 tried++;
                 if (minimum_created_rooms == created_rooms){ writetext.WriteLine("Limit break"); break; }
             } while (tried!=tries);
-
+             
             writetext.WriteLine("");
             writetext.WriteLine("Sizes: " + max_size_rooms + " : " + current_size);
             writetext.WriteLine("Created rooms: " + (created_rooms));
+            writetext.WriteLine("Can't divided: " + cant_divided);
+            writetext.WriteLine("Can't fit: " + cant_fit);
+            writetext.WriteLine("Can't fit by method: " + cant_fit_method);
+            writetext.WriteLine("Room too big: " + too_big);
+
+            output+=("\n");
+            output += ("Sizes: " + max_size_rooms + " : " + current_size+"\n");
+            output += ("Created rooms: " + (created_rooms) + "\n");
+            output += ("Can't divided: " + cant_divided + "\n");
+            output += ("Can't fit: " + cant_fit + "\n");
+            output += ("Can't fit by method: " + cant_fit_method) + "\n";
+            output+=("Room too big: " + too_big + "\n");
+            output += ("Not unique: " + not_unique + "\n");
+            using (StreamWriter wt = new StreamWriter("Debugs/room_generation_string.txt"))
+            {
+                wt.Write(output);
+            }
+
+                if (method == 1)
+            {
+                for (int i = 0; i < created_rooms; i++)
+                {
+                    rooms[i].setTileSides(cells);
+                    rooms[i].setVisited(cells);
+                }
+
+            }
+            operation.Stop();
+            writetext.WriteLine("Operation took: " + operation.ElapsedMilliseconds + " milliseconds");
         }
 
     }

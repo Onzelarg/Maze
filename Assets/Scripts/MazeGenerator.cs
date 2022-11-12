@@ -41,13 +41,13 @@ public class MazeGenerator : MonoBehaviour
         tries = 200;
         max_room_ratio = 0.6f;
         minimum_created_room = 30;
-        generate(12345678);
+        generate(12345678,0.05f,0.5f);
         //floors[0].generateRoom();
     }
 
-    public void generate(int seed)
+    public void generate(int seed,float min,float max)
     {
-        floors[index] = new FloorGenerator(tile_size, grid_width, grid_height,cell_scale,index,floor,wall,seed);
+        floors[index] = new FloorGenerator(tile_size, grid_width, grid_height,cell_scale,index,floor,wall,seed,min,max);
         floorSize = floors[index].size;
         floorMin = floors[index].min_room;
         floorMax = floors[index].max_room;
@@ -56,7 +56,10 @@ public class MazeGenerator : MonoBehaviour
     public void clear()
     {
         floors[0].clearGrid();
-
+    }
+    public void clearNotvisited()
+    {
+        floors[0].clearNotvisited();
     }
     public void generateRooms(int method)
     {
@@ -73,18 +76,16 @@ public class MazeGenerator : MonoBehaviour
 
     public int[] update_data_arr(int data, int index,int cell_index)
     {
-        int[] _data ={ -1, -1, -1, -1};
-
+        int[] _data = new int[8];
         if (data == 0)
-        {
+        { 
             for (int i = 0; i < 4; i++)
             {
-
-               // _data[i]=floors[index].cells[cell_index].side[i];
-               floors[index].cells[cell_index].tile[0].GetComponent<Renderer>().material = visited;
+                _data[i]=floors[index].cells[cell_index].side[i];
+                _data[i + 4] = floors[index].cells[cell_index].neighbors[i];
+                floors[index].cells[cell_index].tile[0].GetComponent<Renderer>().material = visited;
             }
         }
-
         return _data;
         
     }
@@ -112,6 +113,7 @@ public class MazeGenerator : MonoBehaviour
     {
         floors[0].rooms[room].changeMaterial(floors[0].cells);
     }
+
     public void cleartile()
     {
         for (int i = 0; i < 50; i++)
@@ -121,4 +123,8 @@ public class MazeGenerator : MonoBehaviour
         
     }
 
+    public void roomCek(int index)
+    {
+        floors[0].rooms[index].cekMAt(floors[0].cells);
+    }
 }
