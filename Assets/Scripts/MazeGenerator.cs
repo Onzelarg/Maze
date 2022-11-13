@@ -41,7 +41,7 @@ public class MazeGenerator : MonoBehaviour
         tries = 200;
         max_room_ratio = 0.6f;
         minimum_created_room = 30;
-        generate(12345678,0.05f,0.5f);
+        generate(12345678,0.05f,0.2f);
         //floors[0].generateRoom();
     }
 
@@ -83,13 +83,33 @@ public class MazeGenerator : MonoBehaviour
             {
                 _data[i]=floors[index].cells[cell_index].side[i];
                 _data[i + 4] = floors[index].cells[cell_index].neighbors[i];
-                floors[index].cells[cell_index].tile[0].GetComponent<Renderer>().material = visited;
             }
         }
         return _data;
         
     }
 
+    public bool[] isVisited(int index)
+    {
+        bool[] returns = new bool[2];
+        if (floors[0].cells[index].visited)
+        {
+            returns[0] = true;
+        }
+        else
+        {
+            returns[0] = false;
+        }
+        if (floors[0].cells[index].is_partofRoom)
+        {
+            returns[1] = true;
+        }
+        else
+        {
+            returns[1] = false;
+        }
+        return returns;
+    }
     
     public static void update_material(string _cell_index)
     {

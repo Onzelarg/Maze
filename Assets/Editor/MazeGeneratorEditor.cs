@@ -15,7 +15,7 @@ public class MazeGeneratorInspector : Editor
     bool g_back = false;    //4
     */
     string index="0";
-    string cell_index = "0";
+    int cell_index = 0;
     int min_f;
     int max_f;
     int cell_quantity;
@@ -29,7 +29,8 @@ public class MazeGeneratorInspector : Editor
     bool touch = false;
     string room_id = "0";
     float min = 0.05f;
-    float max = 0.5f;
+    float max = 0.2f;
+    bool[] visited = new bool[] { false,false};
 
     char[] letterIndex = { 'A','a','B','b','C','c','D','d','E','e','F','f','G','g','H','h','I','i','J',
         'j','K','k','L','l','M','m','N','n','O','o','P','p','Q','q','R','r','S','s','T','t','U','u','V',
@@ -118,11 +119,7 @@ public class MazeGeneratorInspector : Editor
             cell_quantity=_mazeGenerator.update_data(2, Convert.ToInt32(index));
         }
 
-        if (GUILayout.Button("Cell Info"))
-        {
-            side = _mazeGenerator.update_data_arr(0, Convert.ToInt32(index), Convert.ToInt32(cell_index));
-
-        }
+        
 
         
 
@@ -214,19 +211,6 @@ public class MazeGeneratorInspector : Editor
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();
-            GUILayout.Label("Cell Index");
-            cell_index = GUILayout.TextField(cell_index, 5);
-            //left     //1  0
-            //right    //2  1
-            //front    //3  2
-            //back     //4  3
-            GUILayout.Label("Left " + side[0]+" : " + side[4]);
-            GUILayout.Label("Right " + side[1] + " : " + side[5]);
-            GUILayout.Label("Front " + side[2] + " : " + side[6]);
-            GUILayout.Label("Back " + side[3] + " : " + side[7]);
-        GUILayout.EndHorizontal();
-
-        GUILayout.BeginHorizontal();
         GUILayout.Label("Seed");
         _seed = GUILayout.TextField(_seed, 10);
         
@@ -261,8 +245,37 @@ public class MazeGeneratorInspector : Editor
 
         // GUILayout.BeginHorizontal();
         // GUILayout.EndHorizontal();
+        EditorGUILayout.Space();
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Cell Index");
+        cell_index = EditorGUILayout.IntField(cell_index);
+        if (GUILayout.Button("Cell Info"))
+        {
+            side = _mazeGenerator.update_data_arr(0, Convert.ToInt32(index), Convert.ToInt32(cell_index));
+            visited = _mazeGenerator.isVisited(cell_index);
+        }
+        GUILayout.EndHorizontal();
+
+        GUILayout.BeginHorizontal();
+        
+        //left     //1  0
+        //right    //2  1
+        //front    //3  2
+        //back     //4  3
+        GUILayout.Label("Left " + side[0]);
+        GUILayout.Label("Right " + side[1]);
+        GUILayout.Label("Front " + side[2]);
+        GUILayout.Label("Back " + side[3]);
+        GUILayout.EndHorizontal();
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Neighbors: " + side[4]+" , " + side[5] + " , " + side[6] + " , " + side[7]);
+        GUILayout.Toggle(visited[0],"Visited");
+        GUILayout.Toggle(visited[1], "Is inside");
+        GUILayout.EndHorizontal();
+
+        
+
     }
 
-
-
+    
 }

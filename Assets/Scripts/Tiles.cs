@@ -20,6 +20,7 @@ public class Tiles
     public Material corner;
     public Material index_mat;
     public int[] neighbors = new int[4];
+    public bool is_partofRoom = false;
 
     public Tiles(Vector3 position,int _index)
     {
@@ -69,20 +70,20 @@ public class Tiles
         //top    //3
         if ((fw*fh)-this.index<=fw)
         {
-            neighbors[2] = -1;
-        }
-        else
-        {
-            neighbors[2] = this.index + fw;
-        }
-        //bottom     //4
-        if (this.index / fh == 0)
-        {
             neighbors[3] = -1;
         }
         else
         {
-            neighbors[3] = this.index - fw;
+            neighbors[3] = this.index + fw;
+        }
+        //bottom     //4
+        if (this.index / fh == 0)
+        {
+            neighbors[2] = -1;
+        }
+        else
+        {
+            neighbors[2] = this.index - fw;
         }
     }
 
@@ -129,7 +130,6 @@ public class Tiles
             tile[4].transform.localScale = new Vector3(Variables.tile_scale * 10, wall_size, Variables.tile_scale * 10);
             tile[4].transform.parent = tile[0].transform;
         }
-
     }
 
     public void changeMaterial(Material mat)
@@ -152,6 +152,31 @@ public class Tiles
         {
             UnityEngine.Object.Destroy(tile[i]);
         }
+    }
+
+    public void clearWall(int i)
+    {
+        UnityEngine.Object.Destroy(tile[i]);
+    }
+
+    public void checkNeighbor(Tiles[] cells)
+    {
+        clearWalls();
+        side = new int[] { 0, 0, 0, 0 };
+        for (int i = 0; i < 4; i++)
+        {
+            if (neighbors[i] == -1)
+            {
+                side[i] = 1;
+            }else if (!cells[neighbors[i]].visited)
+            {
+                side[i] = 1;
+            }
+        }
+        generateSide(side, Resources.Load("Wall") as GameObject);
+
+
+
     }
 
 }

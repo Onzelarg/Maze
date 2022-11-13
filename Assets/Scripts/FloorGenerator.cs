@@ -24,6 +24,7 @@ public class FloorGenerator
     List<GameObject> tile_parents = new List<GameObject>();
     int seed;
     public List<Room> rooms=new List<Room>();
+    List<int> corridor = new List<int>();
 
     public FloorGenerator(float _tile_size, int _grid_width, int _grid_height, float _cell_scale, int _index,GameObject _floor,GameObject _wall,int seed,float min_room_multiplier,float max_room_multiplier)
     {
@@ -282,7 +283,7 @@ public class FloorGenerator
                                 {
                                     for (int i = 0; i < created_rooms; i++)
                                     {
-                                        is_unique=rooms[created_rooms].mergeTiles(rooms[i],counter++,created_rooms,i);
+                                        is_unique=rooms[created_rooms].checkUniqueness(rooms[i]);
                                         if (!is_unique)
                                         {
                                             not_unique++;
@@ -291,15 +292,14 @@ public class FloorGenerator
                                     }
                                      
                                 }
-                                if (method!=1)
-                                {
-                                    rooms[created_rooms].setTileSides(cells);
-                                }
 
                                 //rooms[created_rooms].changeMaterial(cells);
                                 if (is_unique)
                                 {
-                                    
+                                    for (int i = 0; i < created_rooms; i++)
+                                    {
+                                        rooms[created_rooms].mergeTiles(cells,rooms[i], counter++, created_rooms, i);
+                                    }
                                     current_size += room_size;
                                     created_rooms++;
                                 }
@@ -371,14 +371,33 @@ public class FloorGenerator
                 wt.Write(output);
             }
 
-                if (method == 1)
+            for (int i = 0; i < created_rooms; i++)
             {
-                for (int i = 0; i < created_rooms; i++)
+                rooms[i].setTileSides(cells);
+                rooms[i].setVisited(cells);
+                rooms[i].makePartofRoom(cells);
+            }
+            for (int i = 0; i < created_rooms; i++)
+            { 
+                if (rooms[i].connected_rooms.Count==0)
                 {
-                    rooms[i].setTileSides(cells);
-                    rooms[i].setVisited(cells);
+                    int other_room = rooms[i].room_index;
+                    while (other_room == rooms[i].room_index) {
+                        other_room = UnityEngine.Random.Range(0, rooms.Count);
+                        if (rooms[other_room].connected_rooms.Count==0)
+                        {
+                            other_room = rooms[i].room_index;
+                        }
+                    }
+                    rooms[i].makeConnection(cells, rooms[other_room], rooms[other_room].room_index,corridor);
                 }
-
+            }
+            for (int i = 0; i < corridor.Count; i++)
+            {
+                if (cells[corridor[i]].visited)
+                {
+                    cells[corridor[i]].checkNeighbor(cells);
+                }
             }
             operation.Stop();
             writetext.WriteLine("Operation took: " + operation.ElapsedMilliseconds + " milliseconds");

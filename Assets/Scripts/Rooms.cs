@@ -6,6 +6,7 @@ using System.Linq;
 using System;
 using System.Reflection;
 using static Room;
+using UnityEditor.MemoryProfiler;
 
 public class Room
 {
@@ -23,6 +24,7 @@ public class Room
     public int connected_room_index;
     public int room_index;
     float uniqueness = 1f;
+    public List<int> connected_rooms = new List<int>();
 
     public class room_cell
     {
@@ -33,8 +35,7 @@ public class Room
 
     public struct corner_cell
     {
-        public int x;
-        public int z;
+        public Vector2 position;
         public int index;
         public bool isIndex;
     }
@@ -96,58 +97,22 @@ public class Room
                 writetext.WriteLine("Cell index is top right ");
                 corner_cells[1].isIndex = true;
             }
-            //TopLeft      0
-            //TopRight     1
-            //BottomLeft   2
-            //BottomRight  3
-            //if (_x_positive && _z_positive)
-            //{
-            //    this.bottomleft[0] = _cell_index;                                             2
-            //    this.bottomright[0] = bottomleft[0] + room_width - 1;                         3=2
-            //    this.topleft[0] = bottomleft[0] + ((room_height - 1) * _floor_w);             0=2
-            //    this.topright[0] = topleft[0] + room_width - 1;                               1=0
-            //    writetext.WriteLine("Cell index is bottom left ");
-            //}
-            //else if (_x_positive && !_z_positive)
-            //{
-            //    this.topleft[0] = _cell_index;                                                0
-            //    this.topright[0] = topleft[0] + room_width - 1;                               1=0
-            //    this.bottomleft[0] = topleft[0] - ((room_height - 1) * _floor_w);             2=0
-            //    this.bottomright[0] = bottomleft[0] + room_width - 1;                         3=2
-            //    writetext.WriteLine("Cell index is top left ");
-            //}
-            //else if (!_x_positive && _z_positive)
-            //{
-            //    this.bottomright[0] = _cell_index;                                            3
-            //    this.bottomleft[0] = bottomright[0] - room_width + 1;                         2=3
-            //    this.topleft[0] = bottomleft[0] + ((room_height - 1) * _floor_w);             0=2
-            //    this.topright[0] = topleft[0] + room_width - 1;                               1=0
-            //    writetext.WriteLine("Cell index is bottom right ");
-            //}
-            //else if (!_x_positive && !_z_positive)
-            //{
-            //    this.topright[0] = _cell_index;                                               1
-            //    this.topleft[0] = topright[0] - room_width + 1;                               0=1
-            //    this.bottomleft[0] = topleft[0] - ((room_height - 1) * _floor_w);             2=0
-            //    this.bottomright[0] = bottomleft[0] + room_width - 1;                         3=2
-            //    writetext.WriteLine("Cell index is top right ");
 
-            //}
 
-            corner_cells[0].x = (int)(cells[corner_cells[0].index].x);
-            corner_cells[0].z = (int)(cells[corner_cells[0].index].z);
-            corner_cells[1].x = (int)(cells[corner_cells[1].index].x);
-            corner_cells[1].z = (int)(cells[corner_cells[1].index].z);
-            corner_cells[2].x = (int)(cells[corner_cells[2].index].x);
-            corner_cells[2].z = (int)(cells[corner_cells[2].index].z);
-            corner_cells[3].x = (int)(cells[corner_cells[3].index].x);
-            corner_cells[3].z = (int)(cells[corner_cells[3].index].z);
+            corner_cells[0].position.x = (int)(cells[corner_cells[0].index].x);
+            corner_cells[0].position.y = (int)(cells[corner_cells[0].index].z);
+            corner_cells[1].position.x = (int)(cells[corner_cells[1].index].x);
+            corner_cells[1].position.y = (int)(cells[corner_cells[1].index].z);
+            corner_cells[2].position.x = (int)(cells[corner_cells[2].index].x);
+            corner_cells[2].position.y = (int)(cells[corner_cells[2].index].z);
+            corner_cells[3].position.x = (int)(cells[corner_cells[3].index].x);
+            corner_cells[3].position.y = (int)(cells[corner_cells[3].index].z);
 
             writetext.WriteLine("Cell index: " + _cell_index);
-            writetext.WriteLine("Top Left: " + corner_cells[0].index + " X: " + corner_cells[0].x + " Z: " + corner_cells[0].z);
-            writetext.WriteLine("Top Right: " + corner_cells[1].index + " X: " + corner_cells[1].x + " Z: " + corner_cells[1].z);
-            writetext.WriteLine("Bottom Left: " + corner_cells[2].index + " X: " + corner_cells[2].x + " Z: " + corner_cells[2].z);
-            writetext.WriteLine("Bottom Right: " + corner_cells[3].index + " X: " + corner_cells[3].x + " Z: " + corner_cells[3].z);
+            writetext.WriteLine("Top Left: " + corner_cells[0].index + " X: " + corner_cells[0].position.x + " Z: " + corner_cells[0].position.y);
+            writetext.WriteLine("Top Right: " + corner_cells[1].index + " X: " + corner_cells[1].position.x + " Z: " + corner_cells[1].position.y);
+            writetext.WriteLine("Bottom Left: " + corner_cells[2].index + " X: " + corner_cells[2].position.x + " Z: " + corner_cells[2].position.y);
+            writetext.WriteLine("Bottom Right: " + corner_cells[3].index + " X: " + corner_cells[3].position.x + " Z: " + corner_cells[3].position.y);
             writetext.WriteLine("Room width: " + room_width);
             writetext.WriteLine("Room height: " + room_height);
             writetext.WriteLine("X positive: " + _x_positive);
@@ -297,18 +262,17 @@ public class Room
     {
         using (StreamWriter writetext = File.AppendText("Debugs/method/room_cell_method.txt"))
         {
-            //room_cells[corner_cells[3]]
             writetext.WriteLine("");
-            writetext.Write("This index: " + this.cell_index + " Other index:" + other.cell_index + " TTL X: " + this.corner_cells[0].x + " TTL Y: " + this.corner_cells[0].z);
-            writetext.Write(" OTL X: " + other.corner_cells[0].x + " OTL Y: " + other.corner_cells[0].z);
-            writetext.Write(" TBR X: " + this.corner_cells[3].x + " TBR Y: " + this.corner_cells[3].z);
-            writetext.Write(" OBR X: " + other.corner_cells[3].x + " OBR Y: " + other.corner_cells[3].z);
+            writetext.Write("This index: " + this.cell_index + " Other index:" + other.cell_index + " TTL X: " + this.corner_cells[0].position.x + " TTL Y: " + this.corner_cells[0].position.y);
+            writetext.Write(" OTL X: " + other.corner_cells[0].position.x + " OTL Y: " + other.corner_cells[0].position.y);
+            writetext.Write(" TBR X: " + this.corner_cells[3].position.x + " TBR Y: " + this.corner_cells[3].position.y);
+            writetext.Write(" OBR X: " + other.corner_cells[3].position.x + " OBR Y: " + other.corner_cells[3].position.y);
 
 
             int offset = (int)(tilesize);
             if (method == 2)
             {
-                if (this.corner_cells[0].x >= (other.corner_cells[3].x + offset) || this.corner_cells[3].x <= (other.corner_cells[0].x - offset) || this.corner_cells[0].z <= (other.corner_cells[3].z - offset) || this.corner_cells[3].z >= (other.corner_cells[0].z + offset))
+                if (this.corner_cells[0].position.x >= (other.corner_cells[3].position.x + offset) || this.corner_cells[3].position.x <= (other.corner_cells[0].position.x - offset) || this.corner_cells[0].position.y <= (other.corner_cells[3].position.y - offset) || this.corner_cells[3].position.y >= (other.corner_cells[0].position.y + offset))
                 {
                     writetext.Write(" true");
                     return true;
@@ -318,7 +282,7 @@ public class Room
             if (method == 3)
             {
                 offset = offset * 2;
-                if (this.corner_cells[0].x > (other.corner_cells[3].x + offset) || this.corner_cells[3].x < (other.corner_cells[0].x - offset) || this.corner_cells[0].z < (other.corner_cells[3].z - offset) || this.corner_cells[3].z > (other.corner_cells[0].z + offset))
+                if (this.corner_cells[0].position.x > (other.corner_cells[3].position.x + offset) || this.corner_cells[3].position.x < (other.corner_cells[0].position.x - offset) || this.corner_cells[0].position.y < (other.corner_cells[3].position.y - offset) || this.corner_cells[3].position.y > (other.corner_cells[0].position.y + offset))
                 {
                     writetext.Write(" true");
                     return true;
@@ -330,9 +294,37 @@ public class Room
         }
     }
 
-    public bool mergeTiles(Room other,int counter,int room_id,int oroom_id)
+    public bool checkUniqueness(Room other)
+    {
+            for (int i = 0; i < room_cells.Count; i++)
+            {
+                for (int j = 0; j < other.room_cells.Count; j++)
+                {
+                    if (room_cells.ElementAt(i).Key == other.room_cells.ElementAt(j).Key)
+                    {
+                        uniqueness -= (1f / this.room_cells.Count);
+                        if (uniqueness < 0.7f)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+        return true;
+    }
+
+    public void makePartofRoom(Tiles[] cells)
+    {
+        for (int i = 0; i < room_cells.Count; i++)
+        {
+            cells[room_cells.ElementAt(i).Key].is_partofRoom = true;
+        }
+    }
+
+    public void mergeTiles(Tiles[] cells, Room other,int counter,int room_id,int oroom_id)
     {
         DateTime now = DateTime.Now;
+        bool connected = false;
 
         using (StreamWriter wt = new StreamWriter("Debugs/merged_mat/before " + counter +" .txt"))
         {
@@ -371,13 +363,8 @@ public class Room
                 {
                     if (room_cells.ElementAt(i).Key == other.room_cells.ElementAt(j).Key)
                     {
-                        uniqueness -= (1f / this.room_cells.Count);
+                        connected = true;
                         wt.WriteLine(uniqueness);
-                        if (uniqueness<0.7f)
-                        {
-                            wt.WriteLine("Not unique enough!");
-                            return false;
-                        }
                         if (!room_cells.ElementAt(i).Value.inside)
                         {
                             room_cells.ElementAt(i).Value.inside = true;
@@ -393,8 +380,12 @@ public class Room
                     }
                 }
             }
+            if (connected)
+            {
+                connected_rooms.Add(oroom_id);
+                other.connected_rooms.Add(room_id);
+            }
         }
-        return true;
     }
 
     public void setVisited(Tiles[] cell)
@@ -406,5 +397,61 @@ public class Room
 
     }
 
-
+    public void makeConnection(Tiles[] cells,Room other,int oroom_id,List<int> corridor)
+    {
+        using (StreamWriter wt = new StreamWriter("Debugs/connection/connection" + cell_index + ".txt"))
+        {
+            connected_rooms.Add(oroom_id);
+            int[] start = new int[3];
+            int[] target = new int[3];
+            start[0] = room_cells.ElementAt((UnityEngine.Random.Range(0, room_cells.Count))).Key;
+            target[0] = other.room_cells.ElementAt((UnityEngine.Random.Range(0, other.room_cells.Count))).Key;
+            start[1] = (int)cells[start[0]].x;
+            start[2] = (int)cells[start[0]].z;
+            target[1] = (int)cells[target[0]].x;
+            target[2] = (int)cells[target[0]].z;
+            corridor.Add(start[0]);
+            wt.WriteLine("Start index: " + start[0]+" target :" + target[0]);
+            while (start[1] != target[1])
+            {
+                if (start[1] > target[1])
+                {
+                    start[0]--;
+                }
+                else
+                {
+                    start[0]++;
+                }
+                corridor.Add(start[0]);
+                start[1] = (int)cells[start[0]].x;
+                wt.WriteLine("Index: " + start[0] + " part of room: " + cells[start[0]].is_partofRoom);
+                if (!cells[start[0]].is_partofRoom)
+                {
+                    cells[start[0]].generateSide(new int[] { 0, 0, 1, 1 }, Resources.Load("Wall") as GameObject);
+                    cells[start[0]].changeMaterial(Resources.Load("Connection") as Material);
+                    cells[start[0]].visited = true;
+                }              
+            }
+            while (start[2] != target[2])
+            {
+                if (start[2] > target[2])
+                {
+                    start[0] -= Variables.floor_width;
+                }
+                else
+                {
+                    start[0] += Variables.floor_width;
+                }
+                corridor.Add(start[0]);
+                start[2] = (int)cells[start[0]].z;
+                wt.WriteLine("Index: " + start[0] + " part of room: " + cells[start[0]].is_partofRoom);
+                if (!cells[start[0]].is_partofRoom)
+                {
+                    cells[start[0]].generateSide(new int[] { 1, 1, 0, 0 }, Resources.Load("Wall") as GameObject);
+                    cells[start[0]].changeMaterial(Resources.Load("Connection") as Material);
+                    cells[start[0]].visited = true;
+                }
+            }
+        }
+    }
 }
