@@ -118,10 +118,16 @@ public class MazeGeneratorInspector : Editor
             max_f=_mazeGenerator.update_data(1, Convert.ToInt32(index));
             cell_quantity=_mazeGenerator.update_data(2, Convert.ToInt32(index));
         }
+        if (GUILayout.Button("Make walls"))
+        {
+            _mazeGenerator.makeWalls();
+        }
+        if (GUILayout.Button("Gen no room"))
+        {
+            _mazeGenerator.generateMazeNoRooms();
+        }
 
-        
 
-        
 
         GUILayout.EndHorizontal();
 
@@ -253,6 +259,10 @@ public class MazeGeneratorInspector : Editor
         {
             side = _mazeGenerator.update_data_arr(0, Convert.ToInt32(index), Convert.ToInt32(cell_index));
             visited = _mazeGenerator.isVisited(cell_index);
+        }
+        if (GUILayout.Button("Destroy wall"))
+        {
+            _mazeGenerator.clearWall(cell_index);
         }
         GUILayout.EndHorizontal();
 

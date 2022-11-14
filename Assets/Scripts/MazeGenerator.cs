@@ -32,8 +32,8 @@ public class MazeGenerator : MonoBehaviour
     void Start()
     {
         tile_size = 15f;
-        grid_width = 20;
-        grid_height = 20;
+        grid_width = 100;
+        grid_height = 100;
         cell_scale = 1.5f;
         index = 0;
         floors = new FloorGenerator[10];
@@ -133,7 +133,7 @@ public class MazeGenerator : MonoBehaviour
     {
         floors[0].rooms[room].changeMaterial(floors[0].cells);
     }
-
+     
     public void cleartile()
     {
         for (int i = 0; i < 50; i++)
@@ -146,5 +146,17 @@ public class MazeGenerator : MonoBehaviour
     public void roomCek(int index)
     {
         floors[0].rooms[index].cekMAt(floors[0].cells);
+    }
+    public void makeWalls()
+    {
+        floors[0].makeWalls(false);
+    }
+    public void generateMazeNoRooms()
+    {
+        floors[0].generateMazeNoRooms();
+    }
+    public void clearWall(int index)
+    {
+        floors[0].cells[index].clearWalls();
     }
 }

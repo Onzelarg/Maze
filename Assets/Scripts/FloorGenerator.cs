@@ -6,6 +6,8 @@ using System.Reflection;
 using UnityEngine.UIElements;
 using System.IO;
 using System.Diagnostics;
+using Debug = UnityEngine.Debug;
+using System.Linq;
 
 public class FloorGenerator
 {
@@ -151,6 +153,10 @@ public class FloorGenerator
             output += now.ToString("F");
             do
             {
+                if (tried==153)
+                {
+                    Debug.Log("");
+                }
                 cell_index = (int)(rnd.Next(0, (this.size-1)));
                 room_size = (int)(rnd.Next(this.min_room, this.max_room));
                 bool can_divided = true;
@@ -171,6 +177,34 @@ public class FloorGenerator
                 if (current_size + room_size < max_size_rooms)
                 {
                     //2 3 5	7 11 13	17 19 23 29	31 37 41 43 47 53 59 61 67 71
+                    if (max_size_rooms>1000)
+                    {
+                        if (room_size % 17 == 0)
+                        {
+                            room_width = 17;
+                            room_height = room_size / 17;
+                        }
+                        if (room_size % 29 == 0)
+                        {
+                            room_width = 29;
+                            room_height = room_size / 29;
+                        }
+                        if (room_size % 37 == 0)
+                        {
+                            room_width = 37;
+                            room_height = room_size / 37;
+                        }
+                        if (room_size % 43 == 0)
+                        {
+                            room_width = 43;
+                            room_height = room_size / 43;
+                        }
+                        if (room_size % 59 == 0)
+                        {
+                            room_width = 59;
+                            room_height = room_size / 59;
+                        }
+                    }
                     if (room_size % 11 == 0)
                     {
                         room_width = 11;
@@ -293,7 +327,6 @@ public class FloorGenerator
                                      
                                 }
 
-                                //rooms[created_rooms].changeMaterial(cells);
                                 if (is_unique)
                                 {
                                     for (int i = 0; i < created_rooms; i++)
@@ -364,7 +397,7 @@ public class FloorGenerator
             output += ("Can't divided: " + cant_divided + "\n");
             output += ("Can't fit: " + cant_fit + "\n");
             output += ("Can't fit by method: " + cant_fit_method) + "\n";
-            output+=("Room too big: " + too_big + "\n");
+            output += ("Room too big: " + too_big + "\n");
             output += ("Not unique: " + not_unique + "\n");
             using (StreamWriter wt = new StreamWriter("Debugs/room_generation_string.txt"))
             {
@@ -384,10 +417,6 @@ public class FloorGenerator
                     int other_room = rooms[i].room_index;
                     while (other_room == rooms[i].room_index) {
                         other_room = UnityEngine.Random.Range(0, rooms.Count);
-                        if (rooms[other_room].connected_rooms.Count==0)
-                        {
-                            other_room = rooms[i].room_index;
-                        }
                     }
                     rooms[i].makeConnection(cells, rooms[other_room], rooms[other_room].room_index,corridor);
                 }
@@ -402,6 +431,103 @@ public class FloorGenerator
             operation.Stop();
             writetext.WriteLine("Operation took: " + operation.ElapsedMilliseconds + " milliseconds");
         }
+        generateMazeNoRooms(true);
+
+    }
+    public void makeWalls(bool skip_walls)
+    {
+        for (int i = 0; i < cells.Length; i++)
+        {
+            if (!skip_walls)
+            {
+                cells[i].makeWalls();
+            }else if (!cells[i].visited)
+            {
+                cells[i].makeWalls();
+            }
+            
+        }
+    }
+
+    public void generateMazeNoRooms(bool skip_walls = false,int max_runs = -1)
+    {
+        makeWalls(skip_walls);
+        int runs = 0;
+        int current = UnityEngine.Random.Range(0, size);
+        List<int> previous = new List<int>();
+        previous.Add(current);
+        bool not_finished = true;
+
+        Dictionary<int, int> neighbors = new Dictionary<int, int>();
+        for (int i = 0; i < cells.Length; i++)
+        {
+            neighbors[i] = 0;
+            for (int j = 0; j < 4; j++)
+            {
+                if (cells[i].neighbors[j] != -1)
+                {
+                    neighbors[i]++;
+                }
+            }
+        }
+
+        do
+        {
+            int next = UnityEngine.Random.Range(0, 3);
+            while (cells[current].neighbors[next]==-1 || cells[cells[current].neighbors[next]].visited)
+            {
+                if (neighbors[current] > 0)
+                {
+                    neighbors[current]--;
+                }
+                else
+                {
+                    previous.RemoveAt(previous.Count - 1);
+                    if (previous.Count == 0)
+                    {
+                        not_finished = false;
+                        break;
+                    }
+                    current = previous.Last();
+                }
+                next = UnityEngine.Random.Range(0, 4);
+            }
+            if (!not_finished)
+            {
+                break;
+            }
+            cells[current].clearWall(next+1);
+            
+            if (neighbors[current]>0)
+            {
+                neighbors[current]--;
+            }
+            
+            cells[current].visited=true;
+            current = cells[cells[current].neighbors[next]].index;
+            previous.Add(current);
+            bool not_changed = true;
+            if (next == 0) { next = 2; not_changed = false; }
+            if (next == 1 && not_changed) { next = 1; not_changed = false; }
+            if (next == 2 && not_changed) { next = 4; not_changed = false; }
+            if (next == 3 && not_changed) { next = 3; not_changed = false; }
+            cells[current].clearWall(next);
+            cells[current].visited = true;
+
+            // 0 1 2 3
+            // 1->2 2->1 3->4 4->3
+
+
+            runs++;
+            
+            if (runs==max_runs)
+            {
+                break;
+            }
+        } while (not_finished);
+        Debug.Log(runs);
+
+
 
     }
 

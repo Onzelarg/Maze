@@ -5,8 +5,6 @@ using UnityEngine;
 using System.Linq;
 using System;
 using System.Reflection;
-using static Room;
-using UnityEditor.MemoryProfiler;
 
 public class Room
 {

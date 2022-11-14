@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.Reflection;
-using UnityEngine.UIElements;
 
 public class Tiles
 {
@@ -157,6 +156,11 @@ public class Tiles
     public void clearWall(int i)
     {
         UnityEngine.Object.Destroy(tile[i]);
+    }
+    public void makeWalls()
+    {
+        side = new int[] { 1, 1, 1, 1 };
+        generateSide(side, Resources.Load("Wall") as GameObject);
     }
 
     public void checkNeighbor(Tiles[] cells)
