@@ -21,19 +21,18 @@ public class MazeGenerator : MonoBehaviour
     public int floorSize;
     public int floorMin;
     public int floorMax;
-    [SerializeField] int tries;
-    [SerializeField] float max_room_ratio;
-    [SerializeField] int minimum_created_room;
+    [SerializeField] public int tries;
+    [SerializeField] public float max_room_ratio;
+    [SerializeField] public int minimum_created_room;
 
     //left z-90 right z+90
-    //front x+90 back x+90 
-
+    //front x+90 back x+90
 
     void Start()
     {
         tile_size = 15f;
-        grid_width = 100;
-        grid_height = 100;
+        grid_width = 40;
+        grid_height = 40;
         cell_scale = 1.5f;
         index = 0;
         floors = new FloorGenerator[10];
@@ -149,7 +148,7 @@ public class MazeGenerator : MonoBehaviour
     }
     public void makeWalls()
     {
-        floors[0].makeWalls(false);
+        floors[0].makeWalls();
     }
     public void generateMazeNoRooms()
     {
@@ -159,4 +158,9 @@ public class MazeGenerator : MonoBehaviour
     {
         floors[0].cells[index].clearWalls();
     }
+    public void ccon()
+    {
+        floors[0].checkConnectivity();
+    }
+
 }

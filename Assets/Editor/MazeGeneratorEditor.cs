@@ -126,7 +126,10 @@ public class MazeGeneratorInspector : Editor
         {
             _mazeGenerator.generateMazeNoRooms();
         }
-
+        if (GUILayout.Button("C con"))
+        {
+            _mazeGenerator.ccon();
+        }
 
 
         GUILayout.EndHorizontal();

@@ -401,8 +401,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1873873930}
-        m_TargetAssemblyTypeName: MazeGenerator, Assembly-CSharp
-        m_MethodName: generateMazeNoRooms
+        m_TargetAssemblyTypeName: UI_Maze, Assembly-CSharp
+        m_MethodName: UIgenerateMazeNoRooms
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -863,7 +863,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!20 &1075911676
 Camera:
   m_ObjectHideFlags: 0
@@ -1116,7 +1116,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1873873924}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4182c455acc5445b7a5d0e7281ca3a10, type: 3}
+  m_Script: {fileID: 11500000, guid: 9051dd8d1cdb8423aae592047db2d7f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   floor: {fileID: 0}
@@ -1216,8 +1216,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1873873930}
-        m_TargetAssemblyTypeName: MazeGenerator, Assembly-CSharp
-        m_MethodName: generateRooms
+        m_TargetAssemblyTypeName: UI_Maze, Assembly-CSharp
+        m_MethodName: UIgenerateRooms
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

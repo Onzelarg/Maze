@@ -8,6 +8,9 @@ using System.IO;
 using System.Diagnostics;
 using Debug = UnityEngine.Debug;
 using System.Linq;
+using TMPro;
+using UnityEngine.UI;
+using static System.Net.Mime.MediaTypeNames;
 
 public class FloorGenerator
 {
@@ -27,6 +30,8 @@ public class FloorGenerator
     int seed;
     public List<Room> rooms=new List<Room>();
     List<int> corridor = new List<int>();
+    List<int> unvisited = new List<int>();
+    GameObject[] texts;
 
     public FloorGenerator(float _tile_size, int _grid_width, int _grid_height, float _cell_scale, int _index,GameObject _floor,GameObject _wall,int seed,float min_room_multiplier,float max_room_multiplier)
     {
@@ -40,6 +45,7 @@ public class FloorGenerator
         this.wall = _wall;
         this.min_room = (int)(this.size * min_room_multiplier);
         this.max_room = (int)(this.size * max_room_multiplier);
+        this.texts = new GameObject[this.size];
         Variables.updateVar(_tile_size,_cell_scale,_grid_height,_grid_width);
 
         generateGrid(seed);
@@ -61,11 +67,11 @@ public class FloorGenerator
 
     public void clearNotvisited()
     {
-        for (int i = 0; i < cells.Length; i++)
+        for (int i = 0; i < unvisited.Count; i++)
         {
-            if (!cells[i].visited)
+            if (!cells[unvisited[i]].visited)
             {
-                cells[i].clearAll();
+                cells[unvisited[i]].clearAll();
             }
             
         }
@@ -75,7 +81,7 @@ public class FloorGenerator
     {
         if (cells != null)
         {
-            clearGrid();
+            clearGrid(); 
         }
         this.seed = _seed;
         cells = new Tiles[size];
@@ -104,14 +110,9 @@ public class FloorGenerator
 
                 cells[cell_index] = new Tiles(cell_position,cell_index);
                 cells[cell_index].tile[0].transform.parent = parent_gameObject.transform;
+                unvisited.Add(cell_index);
 
-                //int[] sides = new int[4];
-                //for (int k = 0; k < 4; k++)
-                //{
-                //    sides[k]= (int)(rnd.Next(0, 2));
-                //}
-                ////cells[cell_index].generateSide(sides,wall,tile_size,tile_scale);
-
+                cells[cell_index].text = cells[cell_index].createText();
                 cell_index++;
             }
         }
@@ -119,12 +120,7 @@ public class FloorGenerator
       
     public void generateRoom(int method,float max_room_ratio,int tries, int minimum_created_rooms)
     {
-        // size 400
-        // min 20
-        // max 200
         int max_size_rooms = (int)(this.size * max_room_ratio);
-        //int tries = 200;
-        //int minimum_created_rooms = 30;
 
         Stopwatch operation = new Stopwatch();
         operation.Start();
@@ -153,10 +149,6 @@ public class FloorGenerator
             output += now.ToString("F");
             do
             {
-                if (tried==153)
-                {
-                    Debug.Log("");
-                }
                 cell_index = (int)(rnd.Next(0, (this.size-1)));
                 room_size = (int)(rnd.Next(this.min_room, this.max_room));
                 bool can_divided = true;
@@ -239,9 +231,7 @@ public class FloorGenerator
 
                     if (can_divided)
                     {
-                        //x*tile_size
-                        //z*tile_size
-                        
+                       
                         
 
                         if (cells[cell_index].x!=0)
@@ -407,7 +397,7 @@ public class FloorGenerator
             for (int i = 0; i < created_rooms; i++)
             {
                 rooms[i].setTileSides(cells);
-                rooms[i].setVisited(cells);
+                rooms[i].setVisited(cells,unvisited);
                 rooms[i].makePartofRoom(cells);
             }
             for (int i = 0; i < created_rooms; i++)
@@ -421,91 +411,213 @@ public class FloorGenerator
                     rooms[i].makeConnection(cells, rooms[other_room], rooms[other_room].room_index,corridor);
                 }
             }
-            for (int i = 0; i < corridor.Count; i++)
-            {
-                if (cells[corridor[i]].visited)
-                {
-                    cells[corridor[i]].checkNeighbor(cells);
-                }
-            }
+            checkConnectivity();
+
             operation.Stop();
             writetext.WriteLine("Operation took: " + operation.ElapsedMilliseconds + " milliseconds");
         }
-        generateMazeNoRooms(true);
-
+        cmat(Resources.Load("Room") as Material);
+        //generateMazeNoRooms();
     }
-    public void makeWalls(bool skip_walls)
+
+    void fixCorridor()
     {
-        for (int i = 0; i < cells.Length; i++)
+        for (int i = 0; i < corridor.Count; i++)
         {
-            if (!skip_walls)
+            if (cells[corridor[i]].visited)
             {
-                cells[i].makeWalls();
-            }else if (!cells[i].visited)
-            {
-                cells[i].makeWalls();
+                unvisited.Remove(cells[corridor[i]].index);
+                cells[corridor[i]].checkNeighbor(cells);
             }
-            
         }
     }
 
-    public void generateMazeNoRooms(bool skip_walls = false,int max_runs = -1)
+    public void cmat(Material mat)
     {
-        makeWalls(skip_walls);
+        for (int i = 0; i < unvisited.Count; i++)
+        {
+            cells[unvisited[i]].changeMaterial(mat);
+        }
+    }
+
+    public void cmatCell(Material mat,int index)
+    {
+        cells[index].changeMaterial(mat);
+    }
+
+    public void checkConnectivity()
+    {
+        //0 4
+        int start_room = UnityEngine.Random.Range(0, rooms.Count);
+        //start_room = 0
+        string output = "Connection check:\n";
+        for (int i = 0; i < rooms.Count; i++)
+            //for (int i = 0; i < 1; i++)
+            {
+            int start_cell = rooms[start_room].corner_cells[0].index;
+            List<int> tested = new List<int>();
+            Dictionary<int, int> to_test = new Dictionary<int, int>();
+            to_test[start_cell]=0;
+            int target_cell = -1;
+            if (i == start_room)
+            {
+                continue;
+            }
+             
+            //left     //1
+            //right    //2
+            //front    //3
+            //back     //4
+            target_cell = rooms[i].corner_cells[0].index;
+            int[] sides = new int[] { 1, 0, 3, 2 };
+            int run = 0;
+            while (to_test.Count!=0 && start_cell!=target_cell)
+            {
+                int distance = 0;
+                cmatCell(Resources.Load("Connection") as Material,start_cell);
+                for (int j = 0; j < 4; j++)
+                {
+                    bool neighbor = false; 
+                    bool side = false;
+                    bool test = false;
+                    if(cells[start_cell].neighbors[j] != -1 && cells[cells[start_cell].neighbors[j]].visited) { neighbor = true; }
+                    if(cells[start_cell].side[j] == 0 && cells[cells[start_cell].neighbors[j]].side[sides[j]] == 0) { side = true; }
+                    if(tested.Contains(cells[start_cell].neighbors[j]) == false) { test = true; }
+                    if (neighbor && side && test)
+                    {
+                        distance= (int)(Math.Abs(cells[cells[start_cell].neighbors[j]].x - cells[target_cell].x) + Math.Abs(cells[cells[start_cell].neighbors[j]].z - cells[target_cell].z));
+                        to_test[cells[start_cell].neighbors[j]] = distance;
+                        cells[cells[start_cell].neighbors[j]].text.GetComponent<TextMesh>().text ="Cost: "+(distance).ToString()+"\n";
+                    }
+                }
+                tested.Add(start_cell);
+                to_test.Remove(start_cell);
+                if (to_test.Count != 0)
+                {
+                    int best = to_test.ElementAt(0).Value;
+                    int best_min = 0;
+                    for (int k = 0; k < to_test.Count; k++)
+                    {
+                        if (to_test.ElementAt(k).Value < best)
+                        {
+                            best = to_test.ElementAt(k).Value;
+                            best_min = k;
+                        }
+                    }
+                    start_cell = to_test.ElementAt(best_min).Key;
+                }
+                cells[start_cell].text.GetComponent<TextMesh>().text += "Step: " + run++;
+                Debug.Log("Room: "+i+" run: "+run);
+                output +=to_test.Count+ "\n";
+                if (to_test.Count==0)
+                {
+                    output += "No connection !\n";
+                    rooms[start_room].makeConnection(cells, rooms[i], rooms[i].room_index, corridor);
+                }
+                if (start_cell==target_cell)
+                {
+                    output += "Found it!\n";
+                }
+            }
+            output+=tested.Count+ "\n";
+
+        }
+        fixCorridor();
+        using (StreamWriter wt = new StreamWriter("Debugs/room_generation_connect.txt"))
+        {
+            wt.Write(output);
+
+        }
+
+    }
+
+
+
+
+
+    public void makeWalls()
+    {
+        for (int i = 0; i < unvisited.Count; i++)
+        {
+            cells[unvisited[i]].makeWalls();  
+        }
+    }
+     
+    public void generateMazeNoRooms(int max_runs = -1)
+    {
+        Stopwatch operation = new Stopwatch();
+        operation.Start();
+        string output = "Generation no Room\n";
+        string prev = "Previous list:\n";
+        makeWalls();
         int runs = 0;
-        int current = UnityEngine.Random.Range(0, size);
+        int current = -1;
+        if (rooms.Count==0)
+        {
+            current = UnityEngine.Random.Range(0, unvisited.Count);
+        }
+        else
+        {
+            int room = UnityEngine.Random.Range(0, rooms.Count);
+            int side = UnityEngine.Random.Range(0, 4);
+            switch (side) {
+                case 0: current = rooms[room].left_cells[UnityEngine.Random.Range(0, rooms[room].left_cells.Count)]; break;
+                case 1: current = rooms[room].right_cells[UnityEngine.Random.Range(0, rooms[room].right_cells.Count)]; break;
+                case 2: current = rooms[room].top_cells[UnityEngine.Random.Range(0, rooms[room].top_cells.Count)]; break;
+                case 3: current = rooms[room].bottom_cells[UnityEngine.Random.Range(0, rooms[room].bottom_cells.Count)]; break;
+            }
+        }
+        
         List<int> previous = new List<int>();
         previous.Add(current);
         bool not_finished = true;
 
-        Dictionary<int, int> neighbors = new Dictionary<int, int>();
-        for (int i = 0; i < cells.Length; i++)
-        {
-            neighbors[i] = 0;
-            for (int j = 0; j < 4; j++)
-            {
-                if (cells[i].neighbors[j] != -1)
-                {
-                    neighbors[i]++;
-                }
-            }
-        }
-
         do
         {
-            int next = UnityEngine.Random.Range(0, 3);
-            while (cells[current].neighbors[next]==-1 || cells[cells[current].neighbors[next]].visited)
+            int next = UnityEngine.Random.Range(0, 4);
+            bool not_found_next = true;
+            List<int> available = new List<int>();
+            do
             {
-                if (neighbors[current] > 0)
+                for (int i = 0; i < 4; i++)
                 {
-                    neighbors[current]--;
+                    if (cells[current].neighbors[i] != -1 && !cells[cells[current].neighbors[i]].visited)
+                    {
+                        available.Add(i);
+                    }
+                }
+                if (available.Count!=0)
+                {
+                    next = available[UnityEngine.Random.Range(0, available.Count)];
+                    not_found_next = false;
                 }
                 else
                 {
                     previous.RemoveAt(previous.Count - 1);
+                    output += "Previous count: " + previous.Count + "\n";
                     if (previous.Count == 0)
                     {
                         not_finished = false;
+                        not_found_next = false;
                         break;
                     }
                     current = previous.Last();
+                    prev += "Index: " + previous.Count + " : " + current + "\n";
                 }
-                next = UnityEngine.Random.Range(0, 4);
-            }
+            } while (not_found_next);
+
             if (!not_finished)
             {
                 break;
             }
             cells[current].clearWall(next+1);
             
-            if (neighbors[current]>0)
-            {
-                neighbors[current]--;
-            }
-            
             cells[current].visited=true;
+            output += "Found new: " + current + "\n";
+            output += "Current: " + current + " status: "+cells[current].visited + "\n";
             current = cells[cells[current].neighbors[next]].index;
             previous.Add(current);
+            prev +="Index: "+previous.Count+" : "+ current + "\n";
             bool not_changed = true;
             if (next == 0) { next = 2; not_changed = false; }
             if (next == 1 && not_changed) { next = 1; not_changed = false; }
@@ -513,10 +625,7 @@ public class FloorGenerator
             if (next == 3 && not_changed) { next = 3; not_changed = false; }
             cells[current].clearWall(next);
             cells[current].visited = true;
-
-            // 0 1 2 3
-            // 1->2 2->1 3->4 4->3
-
+            output += "Current: " + current + " status: " + cells[current].visited + "\n";
 
             runs++;
             
@@ -525,10 +634,21 @@ public class FloorGenerator
                 break;
             }
         } while (not_finished);
-        Debug.Log(runs);
 
 
+        operation.Stop();
+        output += "Runs: " + runs + "\n";
+        output+="Operation took: " + operation.ElapsedMilliseconds + " milliseconds";
+        using (StreamWriter wt = new StreamWriter("Debugs/room_generation_no_room.txt"))
+        {
+            wt.Write(output);
+            
+        }
+        using (StreamWriter wt = new StreamWriter("Debugs/room_generation_prevlist.txt"))
+        {
+            wt.Write(prev);
 
+        }
     }
 
 }

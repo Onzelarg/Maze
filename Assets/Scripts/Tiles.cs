@@ -6,7 +6,8 @@ using System.Reflection;
 
 public class Tiles
 {
-    public GameObject[] tile;  
+    public GameObject[] tile;
+    public GameObject text;
     public float x;   
     public float z;    
     float wall_size = 0.6f; 
@@ -15,6 +16,7 @@ public class Tiles
     Vector3 front_back = new Vector3(90, 0, 0);    
     public int index;      
     public bool visited = false;
+    public bool cornered = false;
     public Material visited_mat;
     public Material corner;
     public Material index_mat;
@@ -131,6 +133,22 @@ public class Tiles
         }
     }
 
+    public GameObject createText()
+    {
+        GameObject text=new GameObject("World_Text", typeof(TextMesh));
+        Transform transform = text.transform;
+        transform.SetParent(this.tile[0].transform, true);
+        transform.localPosition = new Vector3(0, 0, 0);
+        transform.Rotate(new Vector3(90, 0, 0));
+        TextMesh textMesh = text.GetComponent<TextMesh>();
+        textMesh.anchor = TextAnchor.MiddleCenter;
+        textMesh.alignment = TextAlignment.Center;
+        textMesh.text = "0";
+        textMesh.fontSize = 18;
+        textMesh.color = UnityEngine.Color.white;
+        return text;
+    }
+
     public void changeMaterial(Material mat)
     {
         tile[0].GetComponent<Renderer>().material = mat;
@@ -142,7 +160,6 @@ public class Tiles
         {
             UnityEngine.Object.Destroy(tile[i]);
         }
-
     }
      
     public void clearWalls()

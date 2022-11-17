@@ -375,6 +375,7 @@ public class Room
                             other.room_cells.ElementAt(j).Value.material = Resources.Load("Room") as Material;
                             wt.WriteLine("Other: id: " + other.room_cells.ElementAt(j).Key + " type: inside");
                         }
+
                     }
                 }
             }
@@ -386,11 +387,12 @@ public class Room
         }
     }
 
-    public void setVisited(Tiles[] cell)
+    public void setVisited(Tiles[] cell,List<int> unvisited)
     {
         for (int i = 0; i < room_cells.Count; i++)
         {
             cell[room_cells.ElementAt(i).Key].visited = true;
+            unvisited.Remove(room_cells.ElementAt(i).Key);
         }
 
     }
