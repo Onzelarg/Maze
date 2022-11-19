@@ -30,7 +30,7 @@ public class FloorGenerator
     int seed;
     public List<Room> rooms=new List<Room>();
     List<int> corridor = new List<int>();
-    List<int> unvisited = new List<int>();
+    public List<int> unvisited = new List<int>();
     GameObject[] texts;
 
     public FloorGenerator(float _tile_size, int _grid_width, int _grid_height, float _cell_scale, int _index,GameObject _floor,GameObject _wall,int seed,float min_room_multiplier,float max_room_multiplier)
@@ -507,7 +507,6 @@ public class FloorGenerator
                     start_cell = to_test.ElementAt(best_min).Key;
                 }
                 cells[start_cell].text.GetComponent<TextMesh>().text += "Step: " + run++;
-                Debug.Log("Room: "+i+" run: "+run);
                 output +=to_test.Count+ "\n";
                 if (to_test.Count==0)
                 {
@@ -528,7 +527,6 @@ public class FloorGenerator
             wt.Write(output);
 
         }
-
     }
 
 

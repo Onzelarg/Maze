@@ -286,7 +286,19 @@ public class MazeGeneratorInspector : Editor
         GUILayout.Toggle(visited[1], "Is inside");
         GUILayout.EndHorizontal();
 
-        
+
+        EditorGUILayout.Space();
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Player stuff");
+        GUILayout.EndHorizontal();
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Spawn player"))
+        {
+            _mazeGenerator.spawnPlayer();
+        }
+        GUILayout.EndHorizontal();
+
+
 
     }
 

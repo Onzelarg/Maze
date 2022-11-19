@@ -1,75 +1,102 @@
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 using System;
+using UnityEngine.InputSystem;
+using System.Collections.Generic;
 
 public class movement : MonoBehaviour
 {
-    public GameObject player;
+    Rigidbody player;
+    float speed = 5f;
+    bool going;
+    Vector3 inputVector;
+    Vector3 rotation;
+    public Camera camera;
+    public Camera playerCam;
 
-    public int speed;
-    public int acceleration;
-    public int maxSpeed;
-    public int jump_height;
-
-    public Vector3 jump;
-
-
-    void Start()
+    private void Awake()
     {
-         player = GameObject.FindGameObjectWithTag("Player");
-         acceleration = 1;
-         speed = 5;
-         maxSpeed = 10;
-         jump_height = 10;
-         jump = new Vector3(0, jump_height, 0);
-        player.transform.position = new Vector3(0, 10, 0);
-        
+        player = GetComponent<Rigidbody>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        float horizontalInput = Input.GetAxis("Horizontal");
-        float verticalInput = Input.GetAxis("Vertical");
-        
-        if (horizontalInput!=0 || verticalInput!=0)
+        if (going)
         {
-            Vector3 movement = new Vector3(horizontalInput, 0, verticalInput);
-            movement.Normalize();
-            player.transform.Translate(movement * Time.deltaTime*speed);
-            if (speed<maxSpeed)
+            move();
+        }
+    }
+
+    public void jump(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            player.AddForce(Vector3.up * speed, ForceMode.Impulse);
+        }
+    }
+
+    public void playerMovement(InputAction.CallbackContext context)
+    {
+        
+        if (context.performed)
+        {
+            //Vector2 inputVector = context.ReadValue<Vector2>();
+            going = true;
+            inputVector = new Vector3(context.ReadValue<Vector2>().x, 0, context.ReadValue<Vector2>().y);
+            Debug.Log(inputVector.x + " : " + inputVector.y + " : " + inputVector.z);
+            player.AddForce(inputVector*10,ForceMode.Force);
+        }
+        if (context.canceled)
+        {
+            going = false;
+        }
+    }
+    void move()
+    {
+        player.AddForce(inputVector * 10, ForceMode.Force);
+    }
+    void rot()
+    {
+        //transform.localRotation = Quaternion.Euler(rotation);
+        playerCam.transform.Rotate(rotation);
+        player.transform.Rotate(rotation);
+    }
+
+    public void map(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            if (camera.enabled)
             {
-                speed += acceleration;
+                camera.enabled = false;
             }
-            //Debug.Log("Player position: "+player.transform.position.x + " : " + player.transform.position.z);
-
-
-        }
-        if (horizontalInput==0 && verticalInput==0)
-        {
-            speed = 1;
-        }
-
-        
-        
-        if (Input.GetKey("space"))
-        {
+            else
+            {
+                camera.enabled = true;
+            }
             
-            player.transform.Translate(jump*Time.deltaTime);
+        }
+    }
+
+    public void rotate(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            if (context.control.name=="q")
+            {
+                rotation = new Vector3(0, -30, 0);
+            }
+            if (context.control.name == "e")
+            {
+                rotation = new Vector3(0, 30, 0);
+            }
+            rot();
         }
 
-    }
 
-    void OnCollisionEnter(Collision floor)
-    {
-        MazeGenerator.update_material(floor.collider.name);
 
-    }
-
-    
-    
+        }
 
 
 
 }
-
