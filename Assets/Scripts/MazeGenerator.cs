@@ -32,8 +32,8 @@ public class MazeGenerator : MonoBehaviour
     void Start()
     {
         tile_size = 15f;
-        grid_width = 20;
-        grid_height = 20;
+        grid_width = 5;
+        grid_height = 30;
         cell_scale = 1.5f;
         index = 0;
         floors = new FloorGenerator[10];
@@ -168,7 +168,9 @@ public class MazeGenerator : MonoBehaviour
     {
         player = new Player();
         player.spawnPlayer(floors[0].cells);
-
-
+    }
+    public void fixc()
+    {
+        floors[0].fixCorridor();
     }
 }

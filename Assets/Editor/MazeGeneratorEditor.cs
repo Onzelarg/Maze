@@ -31,6 +31,7 @@ public class MazeGeneratorInspector : Editor
     float min = 0.05f;
     float max = 0.2f;
     bool[] visited = new bool[] { false,false};
+    int ballz=10;
 
     char[] letterIndex = { 'A','a','B','b','C','c','D','d','E','e','F','f','G','g','H','h','I','i','J',
         'j','K','k','L','l','M','m','N','n','O','o','P','p','Q','q','R','r','S','s','T','t','U','u','V',
@@ -129,6 +130,17 @@ public class MazeGeneratorInspector : Editor
         if (GUILayout.Button("C con"))
         {
             _mazeGenerator.ccon();
+        }
+
+
+        GUILayout.EndHorizontal();
+        GUILayout.BeginHorizontal();
+
+
+
+        if (GUILayout.Button("Fix corridor"))
+        {
+            _mazeGenerator.fixc();
         }
 
 
@@ -298,9 +310,29 @@ public class MazeGeneratorInspector : Editor
         }
         GUILayout.EndHorizontal();
 
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Ballz amount");
+        ballz = EditorGUILayout.IntField(ballz);
+        if (GUILayout.Button("Spawn ballz"))
+        {
+            spawnBallz();
+        }
+        GUILayout.EndHorizontal();
+
 
 
     }
+    void spawnBallz()
+    {
+        GameObject ballziz = Resources.Load("pushme") as GameObject;
+        for (int i = 0; i < ballz; i++)
+        {
+            ballziz=UnityEngine.Object.Instantiate(ballziz, new Vector3(0, i*1, 0), new Quaternion());
+            ballziz.transform.name = "Ballz " + i;
+        }
 
+
+
+    }
     
 }

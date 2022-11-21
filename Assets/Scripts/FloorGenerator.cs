@@ -30,7 +30,7 @@ public class FloorGenerator
     int seed;
     public List<Room> rooms=new List<Room>();
     List<int> corridor = new List<int>();
-    public List<int> unvisited = new List<int>();
+    public List<int> unvisited;
     GameObject[] texts;
 
     public FloorGenerator(float _tile_size, int _grid_width, int _grid_height, float _cell_scale, int _index,GameObject _floor,GameObject _wall,int seed,float min_room_multiplier,float max_room_multiplier)
@@ -46,8 +46,8 @@ public class FloorGenerator
         this.min_room = (int)(this.size * min_room_multiplier);
         this.max_room = (int)(this.size * max_room_multiplier);
         this.texts = new GameObject[this.size];
-        Variables.updateVar(_tile_size,_cell_scale,_grid_height,_grid_width);
 
+        Variables.updateVar(_tile_size, _cell_scale, _grid_height, _grid_width);
         generateGrid(seed);
 
     }
@@ -96,6 +96,7 @@ public class FloorGenerator
             tile_scale = tile_size / 10;
         }
         System.Random rnd = new System.Random(this.seed);
+        unvisited = new List<int>();
         for (int i = 0; i < floor_height; i++)
         {
             for (int j = 0; j < floor_width; j++)
@@ -411,7 +412,7 @@ public class FloorGenerator
                     rooms[i].makeConnection(cells, rooms[other_room], rooms[other_room].room_index,corridor);
                 }
             }
-            checkConnectivity();
+            //checkConnectivity();
 
             operation.Stop();
             writetext.WriteLine("Operation took: " + operation.ElapsedMilliseconds + " milliseconds");
@@ -420,7 +421,7 @@ public class FloorGenerator
         //generateMazeNoRooms();
     }
 
-    void fixCorridor()
+    public void fixCorridor()
     {
         for (int i = 0; i < corridor.Count; i++)
         {
@@ -477,17 +478,19 @@ public class FloorGenerator
                 cmatCell(Resources.Load("Connection") as Material,start_cell);
                 for (int j = 0; j < 4; j++)
                 {
-                    bool neighbor = false; 
+                    int n_index = cells[start_cell].neighbors[j];
                     bool side = false;
-                    bool test = false;
-                    if(cells[start_cell].neighbors[j] != -1 && cells[cells[start_cell].neighbors[j]].visited) { neighbor = true; }
-                    if(cells[start_cell].side[j] == 0 && cells[cells[start_cell].neighbors[j]].side[sides[j]] == 0) { side = true; }
-                    if(tested.Contains(cells[start_cell].neighbors[j]) == false) { test = true; }
-                    if (neighbor && side && test)
+                    bool not_tested = false;
+                    if (n_index != -1 && cells[n_index].visited)
                     {
-                        distance= (int)(Math.Abs(cells[cells[start_cell].neighbors[j]].x - cells[target_cell].x) + Math.Abs(cells[cells[start_cell].neighbors[j]].z - cells[target_cell].z));
-                        to_test[cells[start_cell].neighbors[j]] = distance;
-                        cells[cells[start_cell].neighbors[j]].text.GetComponent<TextMesh>().text ="Cost: "+(distance).ToString()+"\n";
+                        if (cells[start_cell].side[j] == 0 && cells[cells[start_cell].neighbors[j]].side[sides[j]] == 0) { side = true; }
+                        if (tested.Contains(cells[start_cell].neighbors[j]) == false) { not_tested = true; }
+                        if (side && not_tested)
+                        {
+                            distance = (int)(Math.Abs(cells[cells[start_cell].neighbors[j]].x - cells[target_cell].x) + Math.Abs(cells[cells[start_cell].neighbors[j]].z - cells[target_cell].z));
+                            to_test[cells[start_cell].neighbors[j]] = distance;
+                            cells[cells[start_cell].neighbors[j]].text.GetComponent<TextMesh>().text = "Cost: " + (distance).ToString() + "\n";
+                        }
                     }
                 }
                 tested.Add(start_cell);

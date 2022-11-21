@@ -33,10 +33,19 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Rotate",
-                    "type": "Button",
-                    "id": "7a61ac44-d4d9-4d18-9246-8ed071e2e346",
-                    "expectedControlType": "Button",
+                    "name": "MouseX",
+                    "type": "PassThrough",
+                    "id": "e4672413-ae99-4772-8d7b-8977ff48a167",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "MouseY",
+                    "type": "PassThrough",
+                    "id": "a002bce1-791d-446a-bc47-ade1bf29ce0b",
+                    "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -122,23 +131,23 @@
                 },
                 {
                     "name": "",
-                    "id": "b068a6e8-0034-46fa-8570-4099de6e1ece",
-                    "path": "<Keyboard>/q",
+                    "id": "18e38d02-2567-4cda-988c-02a9790a462e",
+                    "path": "<Mouse>/delta/x",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Rotate",
+                    "action": "MouseX",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "5bb6896a-a9ad-4e47-b96f-9269f55c1ed3",
-                    "path": "<Keyboard>/e",
+                    "id": "77d708a9-0b63-48e0-b838-1ee92c595c83",
+                    "path": "<Mouse>/delta/y",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Rotate",
+                    "action": "MouseY",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

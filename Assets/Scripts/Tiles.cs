@@ -78,7 +78,7 @@ public class Tiles
             neighbors[3] = this.index + fw;
         }
         //bottom     //4
-        if (this.index / fh == 0)
+        if (this.index / fw == 0)
         {
             neighbors[2] = -1;
         }
