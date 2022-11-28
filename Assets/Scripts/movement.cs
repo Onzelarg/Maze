@@ -18,15 +18,25 @@ public class movement : MonoBehaviour
     [SerializeField] int top_view;
     [SerializeField] float mouse_sensitivity_x;
     [SerializeField] float mouse_sensitivity_y;
-    [SerializeField] float x_clamp = 85f;
+    //[SerializeField] float x_clamp = 85f;
     [SerializeField] bool rotate_on;
     float mouse_x, mouse_y, x_rotation;
     Vector3 offset;
-
+    PlayerInput playerInput;
+    CharacterController characterController;
+    InputAction actionMove;
+    InputAction actionLook;
+    InputAction actionJump;
 
     private void Awake()
     {
         player = GetComponent<Rigidbody>();
+        playerInput = GetComponent<PlayerInput>();
+        characterController = GetComponent<CharacterController>();
+        actionJump = playerInput.actions["Jump"];
+        actionLook = playerInput.actions["Mouse"];
+        actionMove = playerInput.actions["Movement"];
+        
         top.enabled = false;
         map_cam.enabled = false;
         top_view = 50;

@@ -33,22 +33,22 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "MouseX",
-                    "type": "PassThrough",
+                    "name": "Mouse",
+                    "type": "Value",
                     "id": "e4672413-ae99-4772-8d7b-8977ff48a167",
-                    "expectedControlType": "Axis",
+                    "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 },
                 {
-                    "name": "MouseY",
-                    "type": "PassThrough",
-                    "id": "a002bce1-791d-446a-bc47-ade1bf29ce0b",
+                    "name": "Scroll",
+                    "type": "Value",
+                    "id": "4c5fcdd0-3c5a-458f-af57-0341107df2ea",
                     "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -64,7 +64,18 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "2D Vector",
+                    "name": "",
+                    "id": "5161ae1e-58d8-40ee-af08-cf80d49af3be",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "WASD",
                     "id": "e91158b0-f709-438e-85ce-1e90d5e4fcfa",
                     "path": "2DVector(mode=2)",
                     "interactions": "",
@@ -120,6 +131,17 @@
                 },
                 {
                     "name": "",
+                    "id": "2e78a886-6736-4a29-b6d9-3e83dbd3e42d",
+                    "path": "<Gamepad>/leftStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Movement",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "28eb808b-8415-4dfd-acdf-a3be3f92c2c5",
                     "path": "<Keyboard>/m",
                     "interactions": "",
@@ -131,23 +153,45 @@
                 },
                 {
                     "name": "",
-                    "id": "18e38d02-2567-4cda-988c-02a9790a462e",
-                    "path": "<Mouse>/delta/x",
+                    "id": "19ade91d-1320-49f0-8617-26c50fff61fd",
+                    "path": "<Gamepad>/buttonWest",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "MouseX",
+                    "action": "Map",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "77d708a9-0b63-48e0-b838-1ee92c595c83",
-                    "path": "<Mouse>/delta/y",
+                    "id": "18e38d02-2567-4cda-988c-02a9790a462e",
+                    "path": "<Mouse>/delta",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "MouseY",
+                    "action": "Mouse",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0619bdf1-a859-4581-912c-ec2cecbd0058",
+                    "path": "<Gamepad>/rightStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Mouse",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "379d6b46-f5f0-40eb-a600-b7ee35cbb809",
+                    "path": "<Mouse>/scroll/y",
+                    "interactions": "",
+                    "processors": "Clamp(min=-4,max=4)",
+                    "groups": "",
+                    "action": "Scroll",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

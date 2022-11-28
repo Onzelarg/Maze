@@ -33,7 +33,7 @@ public class MazeGenerator : MonoBehaviour
     {
         tile_size = 15f;
         grid_width = 5;
-        grid_height = 30;
+        grid_height = 300;
         cell_scale = 1.5f;
         index = 0;
         floors = new FloorGenerator[10];

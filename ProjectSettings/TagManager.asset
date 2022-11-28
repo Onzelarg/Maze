@@ -5,15 +5,18 @@ TagManager:
   serializedVersion: 2
   tags:
   - wall
+  - PlayerFollowCamera
+  - Cameratarget
+  - Playermodel
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Ground
   - Water
   - UI
   - Pushable
-  - 
+  - ground
   - 
   - 
   - 

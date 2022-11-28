@@ -32,6 +32,9 @@ public class MazeGeneratorInspector : Editor
     float max = 0.2f;
     bool[] visited = new bool[] { false,false};
     int ballz=10;
+    int cubex = 3;
+    int cubey = 3;
+    int cubez = 3;
 
     char[] letterIndex = { 'A','a','B','b','C','c','D','d','E','e','F','f','G','g','H','h','I','i','J',
         'j','K','k','L','l','M','m','N','n','O','o','P','p','Q','q','R','r','S','s','T','t','U','u','V',
@@ -319,6 +322,23 @@ public class MazeGeneratorInspector : Editor
         }
         GUILayout.EndHorizontal();
 
+        GUILayout.BeginHorizontal();
+
+        GUILayout.Label("Cube X");
+        cubex = EditorGUILayout.IntField(cubex);
+
+        GUILayout.Label("Cube Y");
+        cubey = EditorGUILayout.IntField(cubey);
+
+        GUILayout.Label("Cube Z");
+        cubez = EditorGUILayout.IntField(cubez);
+
+        if (GUILayout.Button("Spawn ballz"))
+        {
+            spawnCubes();
+        }
+        GUILayout.EndHorizontal();
+
 
 
     }
@@ -330,9 +350,42 @@ public class MazeGeneratorInspector : Editor
             ballziz=UnityEngine.Object.Instantiate(ballziz, new Vector3(0, i*1, 0), new Quaternion());
             ballziz.transform.name = "Ballz " + i;
         }
-
-
-
     }
+
+    void spawnCubes()
+    {
+        GameObject cube = Resources.Load("pushcube") as GameObject;
+        GameObject player=GameObject.FindGameObjectWithTag("Player");
+        Vector3 cubeloc = player.transform.position;
+        cubeloc.y = -0.15f;
+        Vector3 offset = new Vector3(20,0,20);
+        Vector3 iteroffset = new Vector3(0, 0, 0);
+        float cubesize = 0.3f;
+        float scale = 2;
+        cubeloc += offset;
+        Vector3 cubescale = new Vector3(scale, scale, scale);
+        cubesize *= scale;
+        for (int i = 0; i < cubey; i++)
+        {
+            iteroffset.y += cubesize;
+            iteroffset.x = 0;
+
+            for (int j = 0; j < cubex; j++)
+            {
+                iteroffset.x += cubesize;
+                iteroffset.z = 0;
+                for (int k = 0; k < cubez; k++)
+                {
+                    iteroffset.z += cubesize;
+                    cube = UnityEngine.Object.Instantiate(cube, cubeloc+iteroffset, new Quaternion());
+                    cube.transform.localScale = cubescale;
+                    cube.transform.name = "Cube " + (k+k*j+k*j*i);
+                }
+            }
+            
+        }
+    }
+
     
+
 }
