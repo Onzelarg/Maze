@@ -25,6 +25,7 @@ public class MazeGenerator : MonoBehaviour
     [SerializeField] public float max_room_ratio;
     [SerializeField] public int minimum_created_room;
     Player player;
+    public Map map;
 
     //left z-90 right z+90
     //front x+90 back x+90
@@ -32,8 +33,8 @@ public class MazeGenerator : MonoBehaviour
     void Start()
     {
         tile_size = 15f;
-        grid_width = 5;
-        grid_height = 300;
+        grid_width = 20;
+        grid_height = 20;
         cell_scale = 1.5f;
         index = 0;
         floors = new FloorGenerator[10];
@@ -51,6 +52,7 @@ public class MazeGenerator : MonoBehaviour
         floorSize = floors[index].size;
         floorMin = floors[index].min_room;
         floorMax = floors[index].max_room;
+        map.drawEmpty();
     }
 
     public void clear()

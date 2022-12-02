@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Cinemachine;
 using TMPro;
+using System;
 
 public class movement_new : MonoBehaviour
 {
@@ -9,7 +10,6 @@ public class movement_new : MonoBehaviour
     public float playerSpeed;
     public float jumpHeight;
     Vector3 toMove;
-    public Camera mapCam;
     public int topView;
     PlayerInput playerInput;
     InputAction actionMove;
@@ -17,8 +17,8 @@ public class movement_new : MonoBehaviour
     InputAction actionJump;
     InputAction actionMap;
     InputAction actionScroll;
+    InputAction actionAttack;
     public bool isGrounded;
-    public bool isMoving;
     bool isPaused;
     public float jumpFreq;
     public float rotationSpeed;
@@ -27,6 +27,17 @@ public class movement_new : MonoBehaviour
     public float ySensitivity;
     CinemachineFramingTransposer cinFollow;
     public TextMeshProUGUI deviceText;
+    public Animator animator;
+    float animationSpeed;
+    int moveXAnimation;
+    int moveZAnimation;
+    int jumpAnimation;
+    int attackAnimation;
+    public Map map;
+    public Camera mapCam;
+    public Canvas canvas;
+
+    public float rayLength;
 
     void Awake()
     {
@@ -36,10 +47,10 @@ public class movement_new : MonoBehaviour
         actionMove = playerInput.actions["Movement"];
         actionMap = playerInput.actions["Map"];
         actionScroll = playerInput.actions["Scroll"];
+        actionAttack = playerInput.actions["Attack"];
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody>();
         isGrounded = true;
         Cursor.visible = false;
-        mapCam.enabled = false;
         isPaused = false;
         topView = 50;
         jumpFreq = 0.5f;
@@ -49,35 +60,43 @@ public class movement_new : MonoBehaviour
         rotationSpeed = 70f;
         playerSpeed = 20f;
         player.freezeRotation= true;
-        isMoving = false;
         cinFollow = cinCam.GetCinemachineComponent<CinemachineFramingTransposer>();
         xSensitivity = cinCam.GetCinemachineComponent<CinemachinePOV>().m_HorizontalAxis.m_MaxSpeed;
         ySensitivity = cinCam.GetCinemachineComponent<CinemachinePOV>().m_VerticalAxis.m_MaxSpeed;
+        animationSpeed = 0.15f;
+        moveXAnimation = Animator.StringToHash("MoveX");
+        moveZAnimation = Animator.StringToHash("MoveZ");
+        jumpAnimation= Animator.StringToHash("Jump");
+        attackAnimation= Animator.StringToHash("Attack");
+        mapCam.enabled = false;
+        mapCam.depth = -10;
+        rayLength = 0.5f;
     }
 
     void OnEnable()
     {
         actionMove.performed += ActionMove_performed;
-        actionMove.canceled += ActionMove_canceled;
         actionScroll.started += ActionScroll_started;
         actionLook.started += ActionLook_started;
         actionMap.started += ActionMap_started;
         actionJump.started += ActionJump_started;
+        actionAttack.started += ActionAttack_started;
     }
 
     void OnDisable()
     {
         actionMove.performed -= ActionMove_performed;
-        actionMove.canceled -= ActionMove_canceled;
         actionScroll.started -= ActionScroll_started;
         actionLook.started -= ActionLook_started;
         actionMap.started -= ActionMap_started;
         actionJump.started -= ActionJump_started;
+        actionAttack.started -= ActionAttack_started;
     }
 
     void Update()
     {
-        if (!isPaused || isMoving)
+        groundCheck();
+        if (!isPaused && isGrounded)
         {
             playerMovement();
         }
@@ -85,15 +104,9 @@ public class movement_new : MonoBehaviour
         ySensitivity = cinCam.GetCinemachineComponent<CinemachinePOV>().m_VerticalAxis.m_MaxSpeed;
     }
 
-    void ActionMove_canceled(InputAction.CallbackContext obj)
-    {
-        isMoving = false;
-    }
-
     void ActionMove_performed(InputAction.CallbackContext obj)
     {
         playerMovement();
-        isMoving = true;
         getDevice(obj);
     }
 
@@ -103,9 +116,15 @@ public class movement_new : MonoBehaviour
         cinFollow.m_CameraDistance -= scroll * 0.1f;
     }
 
-    private void ActionLook_started(InputAction.CallbackContext obj)
+    void ActionLook_started(InputAction.CallbackContext obj)
     {
         getDevice(obj);
+    }
+
+    void ActionAttack_started(InputAction.CallbackContext obj)
+    {
+        animator.CrossFade(attackAnimation, animationSpeed);
+        getDevice(obj);  
     }
 
     void getDevice(InputAction.CallbackContext obj)
@@ -147,15 +166,10 @@ public class movement_new : MonoBehaviour
         if (isGrounded)
         {
             player.AddForce(Vector3.up * jumpHeight, ForceMode.Impulse);
+            animator.CrossFade(jumpAnimation, animationSpeed);
             isGrounded = false;
         }      
         getDevice(obj);
-        Invoke("jumpEnable", jumpFreq);
-    }
-
-    void jumpEnable()
-    {
-        isGrounded = true;
     }
 
     Vector3 convertToCamera(Vector3 toRotate)
@@ -189,23 +203,55 @@ public class movement_new : MonoBehaviour
         Vector3 move = new Vector3(actionMove.ReadValue<Vector2>().x, 0, actionMove.ReadValue<Vector2>().y);
         toMove = convertToCamera(move);
         player.AddForce(toMove * playerSpeed, ForceMode.Force);
-        rotatePlayer();
+        animator.SetFloat(moveXAnimation, move.x);
+        animator.SetFloat(moveZAnimation, move.z);
+        rotatePlayer();  
     }
 
-    private void ActionMap_started(InputAction.CallbackContext obj)
+    void ActionMap_started(InputAction.CallbackContext obj)
     {
-        getDevice(obj);
         if (mapCam.enabled)
         {
-            mapCam.enabled = false;
+            canvas.enabled = true;
             isPaused = false;
+            mapCam.enabled = false;
+            mapCam.depth = -10;
         }
         else
         {
-            mapCam.enabled = true;
+            canvas.enabled = false;
             isPaused = true;
-            Vector3 player_pos = transform.position;
-            mapCam.transform.position = new Vector3(player_pos.x, player_pos.y + topView, player_pos.z);
+            mapCam.enabled = true;
+            mapCam.depth = 10;
+        }
+        
+        getDevice(obj);
+    }
+     
+    public void groundCheck()
+    {
+        RaycastHit hit;
+
+        if (Physics.Raycast(player.transform.position, transform.TransformDirection(Vector3.down), out hit,rayLength))
+        {
+            isGrounded = true;
+            if (hit.collider.name.Split("Tile").Length>1)
+            {
+                changeTileColor(Convert.ToInt32(hit.collider.name.Split("Tile")[1]));
+            }
+        }
+        else
+        {
+            isGrounded = false;
         }
     }
+
+    void changeTileColor(int index)
+    {
+        MazeGenerator.floors[0].cells[index].changeMaterial(Resources.Load("Room") as Material);
+        Tiles cell = MazeGenerator.floors[0].cells[index];
+        float scale = MazeGenerator.floors[0].tile_size;
+        map.updateTile(index);
+    }
+
 }

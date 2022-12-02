@@ -173,6 +173,7 @@ public class Tiles
     public void clearWall(int i)
     {
         UnityEngine.Object.Destroy(tile[i]);
+        this.side[i-1] = 0;
     }
     public void makeWalls()
     {

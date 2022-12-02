@@ -23,7 +23,7 @@ public class FloorGenerator
     int index;
     public Tiles[] cells;
     public float tile_size;
-    float tile_scale;
+    public float tile_scale;
     GameObject floor;
     GameObject wall;
     List<GameObject> tile_parents = new List<GameObject>();
@@ -636,7 +636,7 @@ public class FloorGenerator
             }
         } while (not_finished);
 
-
+        
         operation.Stop();
         output += "Runs: " + runs + "\n";
         output+="Operation took: " + operation.ElapsedMilliseconds + " milliseconds";
