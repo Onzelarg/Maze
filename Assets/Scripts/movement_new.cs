@@ -36,6 +36,7 @@ public class movement_new : MonoBehaviour
     public Map map;
     public Camera mapCam;
     public Canvas canvas;
+    public GameObject weapon;
 
     public float rayLength;
 
@@ -81,6 +82,7 @@ public class movement_new : MonoBehaviour
         actionMap.started += ActionMap_started;
         actionJump.started += ActionJump_started;
         actionAttack.started += ActionAttack_started;
+        
     }
 
     void OnDisable()
@@ -123,8 +125,21 @@ public class movement_new : MonoBehaviour
 
     void ActionAttack_started(InputAction.CallbackContext obj)
     {
+        
         animator.CrossFade(attackAnimation, animationSpeed);
         getDevice(obj);  
+    }
+
+    void disableCollision()
+    {
+        if (weapon.TryGetComponent<MeshCollider>(out MeshCollider mesh))
+        {
+            mesh.enabled = false;
+        }
+        if (weapon.TryGetComponent<BoxCollider>(out BoxCollider box))
+        {
+            box.enabled = false;
+        }
     }
 
     void getDevice(InputAction.CallbackContext obj)

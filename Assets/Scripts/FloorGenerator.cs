@@ -10,7 +10,6 @@ using Debug = UnityEngine.Debug;
 using System.Linq;
 using TMPro;
 using UnityEngine.UI;
-using static System.Net.Mime.MediaTypeNames;
 
 public class FloorGenerator
 {

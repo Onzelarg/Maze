@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -12,32 +11,40 @@ public class Map : MonoBehaviour
     public Camera mapCam;
     public Camera miniMap;
     public static List<int> cells;
+    GameObject player;
 
     void Awake()
     {
-        mapTiles = new Dictionary<string, Tile>();
-        mapTiles.Add("1001", Resources.Load("Topleft") as Tile);
-        mapTiles.Add("0001", Resources.Load("Top") as Tile);
-        mapTiles.Add("0101", Resources.Load("Topright") as Tile);
+        mapTiles = new Dictionary<string, Tile>
+        {
+            { "1001", Resources.Load("Topleft") as Tile },
+            { "0001", Resources.Load("Top") as Tile },
+            { "0101", Resources.Load("Topright") as Tile },
 
-        mapTiles.Add("1000", Resources.Load("Left") as Tile);
-        mapTiles.Add("0000", Resources.Load("Empty") as Tile);
-        mapTiles.Add("0100", Resources.Load("Right") as Tile);
+            { "1000", Resources.Load("Left") as Tile },
+            { "0000", Resources.Load("Empty") as Tile },
+            { "0100", Resources.Load("Right") as Tile },
 
-        mapTiles.Add("1010", Resources.Load("Bottomleft") as Tile);
-        mapTiles.Add("0010", Resources.Load("Bottom") as Tile);
-        mapTiles.Add("0110", Resources.Load("Bottomright") as Tile);
+            { "1010", Resources.Load("Bottomleft") as Tile },
+            { "0010", Resources.Load("Bottom") as Tile },
+            { "0110", Resources.Load("Bottomright") as Tile },
 
-        mapTiles.Add("0111", Resources.Load("Noleft") as Tile);
-        mapTiles.Add("1110", Resources.Load("Notop") as Tile);
-        mapTiles.Add("1011", Resources.Load("Noright") as Tile);
-        mapTiles.Add("1101", Resources.Load("Nobottom") as Tile);
+            { "0111", Resources.Load("Noleft") as Tile },
+            { "1110", Resources.Load("Notop") as Tile },
+            { "1011", Resources.Load("Noright") as Tile },
+            { "1101", Resources.Load("Nobottom") as Tile },
 
-        mapTiles.Add("1100", Resources.Load("Sides") as Tile);
-        mapTiles.Add("0011", Resources.Load("Topbottom") as Tile);
+            { "1100", Resources.Load("Sides") as Tile },
+            { "0011", Resources.Load("Topbottom") as Tile },
 
-        mapTiles.Add("player", Resources.Load("Player") as Tile);
+            { "pLeft", Resources.Load("pLeft") as Tile },
+            { "pRight", Resources.Load("pRight") as Tile },
+            { "pTop", Resources.Load("pUp") as Tile },
+            { "pBottom", Resources.Load("pDown") as Tile }
+        };
+
         cells = new List<int>();
+        player = GameObject.FindGameObjectWithTag("Player");
     }
 
     public void drawTile(string type,Vector3Int pos)
@@ -129,14 +136,37 @@ public class Map : MonoBehaviour
             }
         }
     }
-     
+    string getOrientation()
+    {
+        string orientation="";
+        Vector3 playerForward = player.transform.forward;
+        if (playerForward.x<-0.5)
+        {
+            orientation = "pLeft";
+        }
+        if (playerForward.x>0.5)
+        {
+            orientation = "pRight";
+        }
+        if (playerForward.z<-0.5)
+        {
+            orientation = "pBottom";
+        }
+        if (playerForward.z>0.5)
+        {
+            orientation = "pTop";
+        }
+
+        return orientation;
+    }
+
     public void updateTile(int index)
     {
         cells.Add(index);
         Vector3Int position = getCellPosition(0, index);
         playerTMap.ClearAllTiles();
         drawTile(getCellType(0, index), position);
-        playerTMap.SetTile(position, mapTiles["player"]);
+        playerTMap.SetTile(position, mapTiles[getOrientation()]);
         moveMinimap(new Vector3(position.x,-490,position.y));
     }
 

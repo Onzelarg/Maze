@@ -8,6 +8,8 @@ TagManager:
   - PlayerFollowCamera
   - Cameratarget
   - Playermodel
+  - Weapon
+  - RightHand
   layers:
   - Default
   - TransparentFX
@@ -17,7 +19,7 @@ TagManager:
   - UI
   - Pushable
   - ground
-  - 
+  - Weapon
   - 
   - 
   - 
