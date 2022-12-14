@@ -3,17 +3,24 @@ using UnityEngine;
 public class EnemyBase : MonoBehaviour
 {
     public EnemyScriptable enemy;
-    int health;
-    float distance;
-    float attackRange;
+    public int health;
+    public float aggroRange;
+    public float attackRange;
+    public float stoppingDistance;
     GameObject player;
+    GameObject box;
     Vector3 target;
-    Vector3 position;
-    float speed;
-
+    public float speed;
+    float wanderDistance = 5f;
+    Quaternion targetRotation;
+    bool toMove;
+    public bool attacking;
+    Rigidbody rb;
+    Animator animator;
+    
     enum State
     {
-        Moving,
+        Wander,
         Aggrod,
         Attacking
     }
@@ -21,78 +28,156 @@ public class EnemyBase : MonoBehaviour
 
     void Awake()
     {
-        if (enemy!=null)
+        if (enemy != null)
         {
             this.health = enemy.health;
+            this.aggroRange = enemy.aggroRange;
             this.attackRange = enemy.attackRange;
             this.speed = enemy.speed;
-            currentState = State.Moving;
+            currentState = State.Wander;
+            target = Vector3.zero;
+            rb = this.GetComponent<Rigidbody>();
+            stoppingDistance = 1.5f;
+            speed = 4f;
         }
         player = GameObject.FindGameObjectWithTag("Player");
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.collider.name=="Weapon")
+        if (collision.collider.name == "Weapon")
         {
             health -= collision.collider.GetComponent<Weapon>().damage;
-            Debug.Log(health);
-            if (health<=0)
+            if (health <= 0)
             {
                 Destroy(this.gameObject);
             }
         }
 
-        if (currentState==State.Attacking && collision.collider.name=="Player")
+        if (currentState == State.Attacking && collision.collider.name == "PlayerModel")
         {
-            
+            Debug.Log("Player deaded!!!!!");
         }
-         
 
+
+    }
+
+    public void updateStats()
+    {
+        this.health = enemy.health;
+        this.aggroRange = enemy.aggroRange;
+        this.attackRange = enemy.attackRange;
+        this.speed = enemy.speed;
+        animator = this.GetComponent<Animator>();
+        
     }
 
     void Update()
     {
-        distance = Vector3.Distance(this.transform.position, player.transform.position);
-        if (distance<attackRange)
+        currentState = getState();
+        switch (currentState)
         {
-            currentState = State.Aggrod;
-            Debug.Log("Attack!!!!!!!!!!!!44!");
+            case State.Attacking:
+                toMove = false;
+                if (!attacking)
+                {
+                    attack();
+                }
+                
+                break;
+            case State.Wander:
+                toMove = true;
+                if (NeedsDestination())
+                {
+                    getTarget();
+                }
+                break;
+            case State.Aggrod:
+                toMove = true;
+                getTarget();
+                break;
         }
-        getTarget();
+        if (toMove)
+        {
+            transform.Translate(Vector3.forward * Time.deltaTime * speed);
+        }
+        
+    }
+
+    State getState()
+    {
+        float distance = Vector3.Distance(this.transform.position, player.transform.position);
+        if (distance < attackRange)
+        {
+            return State.Attacking;
+        }
+        if (distance < aggroRange)
+        {
+            return State.Aggrod;
+        }
+        return State.Wander;
+    }
+
+    private bool NeedsDestination()
+    {
+        if (target == Vector3.zero)
+        {
+            return true;
+        }
+
+        float targetDistance;
+        targetDistance = Vector3.Distance(transform.position, target);
+        if (targetDistance <= stoppingDistance || targetDistance>aggroRange)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     void getTarget()
     {
-        position = this.transform.position;
-        if (currentState==State.Moving)
+        if (currentState==State.Wander)
         {
-            position.x += Random.Range(1f, 10f);
-            position.z += Random.Range(1f, 10f);
-            target = position;
+            Vector3 toMove = (transform.position + (transform.forward * 4f)) + new Vector3(UnityEngine.Random.Range(-wanderDistance, wanderDistance), 0f, UnityEngine.Random.Range(-wanderDistance, wanderDistance));
+            target = new Vector3(toMove.x, transform.position.y, toMove.z);
+            Vector3 direction = Vector3.Normalize(target - transform.position);
+            direction = new Vector3(direction.x, 0f, direction.z);
+            targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = targetRotation;
         }
         else if(currentState==State.Aggrod)
         {
             target = player.transform.position;
+            transform.LookAt(player.transform);
         }
-        Invoke(nameof(move), 1f);
     }
-
-    void move()
-    {
-        this.transform.Translate(target-player.transform.position);
-    }
-
-
+     
     void attack()
     {
+        if (!attacking)
+        {
+            attacking = true;
+            animator.CrossFade("Attack", 0.1f);
+        }
+        Invoke(nameof(noAttack), 3f);
+    }
 
+    void noAttack()
+    {
+        attacking = false;
     }
 
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(this.transform.position, attackRange);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(this.transform.position, aggroRange);
+        Gizmos.DrawLine(transform.position, target);
+        Gizmos.color = Color.yellow;
+        Vector3 fw = transform.forward;
+        Gizmos.DrawRay(transform.forward, new Vector3(fw.x+5,fw.y,fw.z+5));
     }
 
 

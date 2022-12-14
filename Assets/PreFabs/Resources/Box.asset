@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 0
   health: 5
-  attackRange: 10
+  aggroRange: 10
+  attackRange: 1
   speed: 5

@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.Tilemaps;
 using System;
+using UnityEngine.UIElements;
 
 [CustomEditor(typeof(MazeGenerator))]
 public class MazeGeneratorInspector : Editor
@@ -35,6 +36,7 @@ public class MazeGeneratorInspector : Editor
     int cubex = 3;
     int cubey = 3;
     int cubez = 3;
+    int cube2 = 10;
 
     char[] letterIndex = { 'A','a','B','b','C','c','D','d','E','e','F','f','G','g','H','h','I','i','J',
         'j','K','k','L','l','M','m','N','n','O','o','P','p','Q','q','R','r','S','s','T','t','U','u','V',
@@ -68,7 +70,7 @@ public class MazeGeneratorInspector : Editor
         }
         return seed;
     }
-
+    
      
     public override void OnInspectorGUI()
     {
@@ -337,11 +339,19 @@ public class MazeGeneratorInspector : Editor
         {
             spawnCubes();
         }
+        GUILayout.Label("Cube 2");
+        cube2 = EditorGUILayout.IntField(cube2);
+
+        if (GUILayout.Button("Spawn cube2"))
+        {
+            spawnCube2();
+        }
         GUILayout.EndHorizontal();
 
 
 
     }
+    
     void spawnBallz()
     {
         GameObject ballziz = Resources.Load("pushme") as GameObject;
@@ -350,6 +360,20 @@ public class MazeGeneratorInspector : Editor
             ballziz=UnityEngine.Object.Instantiate(ballziz, new Vector3(0, i*1, 0), new Quaternion());
             ballziz.transform.name = "Ballz " + i;
         }
+    }
+
+    void spawnCube2()
+    {
+        for (int i = 0; i < cube2; i++)
+        {
+            GameObject box = Instantiate(Resources.Load("Cube2") as GameObject);
+            box.transform.position = new Vector3(-30, 153, -10);
+            box.AddComponent<EnemyBase>();
+            box.GetComponent<EnemyBase>().enemy = Resources.Load("Box") as EnemyScriptable;
+            box.GetComponent<EnemyBase>().updateStats();
+            box.transform.name = "Cube2 " + i;
+        }
+        
     }
 
     void spawnCubes()
