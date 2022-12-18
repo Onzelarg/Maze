@@ -8,4 +8,5 @@ public class EnemyScriptable : ScriptableObject
     public float aggroRange;
     public float attackRange;
     public float speed;
+    public int damage;
 }

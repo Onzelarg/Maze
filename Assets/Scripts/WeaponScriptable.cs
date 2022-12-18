@@ -7,4 +7,5 @@ public class WeaponScriptable : ScriptableObject
     public int id;
     public string weaponName;
     public int damage;
+    public float attackAnimMultiplier;
 }

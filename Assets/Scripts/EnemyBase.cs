@@ -1,9 +1,11 @@
+using TMPro;
 using UnityEngine;
 
 public class EnemyBase : MonoBehaviour
 {
     public EnemyScriptable enemy;
     public int health;
+    public int damage;
     public float aggroRange;
     public float attackRange;
     public float stoppingDistance;
@@ -17,7 +19,13 @@ public class EnemyBase : MonoBehaviour
     public bool attacking;
     Rigidbody rb;
     Animator animator;
-    
+    TextMeshProUGUI healthSlide;
+    TextMesh healthLoss;
+    delegate void damageIndicator(GameObject gameObject,int amount);
+    damageIndicator indicator;
+    delegate void playerHealth(int amount);
+    playerHealth pHealth;
+
     enum State
     {
         Wander,
@@ -25,21 +33,10 @@ public class EnemyBase : MonoBehaviour
         Attacking
     }
     State currentState;
+     
 
     void Awake()
     {
-        if (enemy != null)
-        {
-            this.health = enemy.health;
-            this.aggroRange = enemy.aggroRange;
-            this.attackRange = enemy.attackRange;
-            this.speed = enemy.speed;
-            currentState = State.Wander;
-            target = Vector3.zero;
-            rb = this.GetComponent<Rigidbody>();
-            stoppingDistance = 1.5f;
-            speed = 4f;
-        }
         player = GameObject.FindGameObjectWithTag("Player");
     }
 
@@ -47,7 +44,9 @@ public class EnemyBase : MonoBehaviour
     {
         if (collision.collider.name == "Weapon")
         {
-            health -= collision.collider.GetComponent<Weapon>().damage;
+            int damage = collision.collider.GetComponent<Weapon>().damage;
+            indicator(this.gameObject,damage);
+            health -= damage;
             if (health <= 0)
             {
                 Destroy(this.gameObject);
@@ -56,7 +55,8 @@ public class EnemyBase : MonoBehaviour
 
         if (currentState == State.Attacking && collision.collider.name == "PlayerModel")
         {
-            Debug.Log("Player deaded!!!!!");
+            indicator(player,damage);
+            pHealth(damage);
         }
 
 
@@ -65,11 +65,18 @@ public class EnemyBase : MonoBehaviour
     public void updateStats()
     {
         this.health = enemy.health;
+        this.damage = enemy.damage;
         this.aggroRange = enemy.aggroRange;
         this.attackRange = enemy.attackRange;
         this.speed = enemy.speed;
+        currentState = State.Wander;
+        target = Vector3.zero;
+        rb = this.GetComponent<Rigidbody>();
         animator = this.GetComponent<Animator>();
-        
+        stoppingDistance = 1.5f;
+        speed = 4f;
+        indicator = EnemyUI.instance.damageIndicator;
+        pHealth = Player.instance.updateHealth;
     }
 
     void Update()

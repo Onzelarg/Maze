@@ -17,3 +17,4 @@ MonoBehaviour:
   aggroRange: 10
   attackRange: 1
   speed: 5
+  damage: 2

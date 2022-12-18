@@ -16,3 +16,4 @@ MonoBehaviour:
   id: 1
   weaponName: Queen
   damage: 2
+  attackAnimMultiplier: 0.8

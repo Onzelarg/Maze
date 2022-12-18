@@ -4,6 +4,7 @@ using System.Collections;
 using UnityEngine.Tilemaps;
 using System;
 using UnityEngine.UIElements;
+using static UnityEngine.EventSystems.EventTrigger;
 
 [CustomEditor(typeof(MazeGenerator))]
 public class MazeGeneratorInspector : Editor
@@ -37,6 +38,7 @@ public class MazeGeneratorInspector : Editor
     int cubey = 3;
     int cubez = 3;
     int cube2 = 10;
+    bool ps = false;
 
     char[] letterIndex = { 'A','a','B','b','C','c','D','d','E','e','F','f','G','g','H','h','I','i','J',
         'j','K','k','L','l','M','m','N','n','O','o','P','p','Q','q','R','r','S','s','T','t','U','u','V',
@@ -313,6 +315,11 @@ public class MazeGeneratorInspector : Editor
         {
             _mazeGenerator.spawnPlayer();
         }
+        if (GUILayout.Button("Create player"))
+        {
+            _mazeGenerator.createPlayer();
+            ps = true;
+        }
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();
@@ -344,6 +351,10 @@ public class MazeGeneratorInspector : Editor
 
         if (GUILayout.Button("Spawn cube2"))
         {
+            if (ps==false)
+            {
+                _mazeGenerator.createPlayer();
+            }
             spawnCube2();
         }
         GUILayout.EndHorizontal();

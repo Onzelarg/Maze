@@ -171,6 +171,10 @@ public class MazeGenerator : MonoBehaviour
         player = new Player();
         player.spawnPlayer(floors[0].cells);
     }
+    public void createPlayer()
+    {
+        player = new Player();
+    }
     public void fixc()
     {
         floors[0].fixCorridor();

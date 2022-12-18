@@ -16,3 +16,4 @@ MonoBehaviour:
   id: 0
   weaponName: Enailte
   damage: 1
+  attackAnimMultiplier: 2

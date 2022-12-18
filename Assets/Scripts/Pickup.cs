@@ -26,6 +26,7 @@ public class Pickup : MonoBehaviour
             pick.AddComponent<Weapon>();
             pick.GetComponent<Weapon>().damage = weapon.damage;
             GameObject.FindGameObjectWithTag("Playermodel").GetComponent<WeaponAnimation>().weapon = pick;
+            GameObject.FindGameObjectWithTag("Playermodel").GetComponent<Animator>().SetFloat("attackMultiplier", 1 * weapon.attackAnimMultiplier);
         }
     }
 }
