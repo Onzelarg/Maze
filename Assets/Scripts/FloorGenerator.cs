@@ -560,11 +560,54 @@ public class FloorGenerator
         {
             int room = UnityEngine.Random.Range(0, rooms.Count);
             int side = UnityEngine.Random.Range(0, 4);
-            switch (side) {
-                case 0: current = rooms[room].left_cells[UnityEngine.Random.Range(0, rooms[room].left_cells.Count)]; break;
-                case 1: current = rooms[room].right_cells[UnityEngine.Random.Range(0, rooms[room].right_cells.Count)]; break;
-                case 2: current = rooms[room].top_cells[UnityEngine.Random.Range(0, rooms[room].top_cells.Count)]; break;
-                case 3: current = rooms[room].bottom_cells[UnityEngine.Random.Range(0, rooms[room].bottom_cells.Count)]; break;
+            switch (side)
+            {
+                case 0:
+                    try
+                    {
+                        current = rooms[room].left_cells[UnityEngine.Random.Range(0, rooms[room].left_cells.Count)];
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Log(ex.Message);
+                        return;
+                    }
+
+
+                    break;
+                case 1:
+                    try
+                    {
+                        current = rooms[room].right_cells[UnityEngine.Random.Range(0, rooms[room].right_cells.Count)];
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Log(ex.Message);
+                        return;
+                    }
+                    break;
+                case 2:
+                    try
+                    {
+                        current = rooms[room].top_cells[UnityEngine.Random.Range(0, rooms[room].top_cells.Count)];
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Log(ex.Message);
+                        return;
+                    }
+                    break;
+                case 3:
+                    try
+                    {
+                        current = rooms[room].bottom_cells[UnityEngine.Random.Range(0, rooms[room].bottom_cells.Count)];
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Log(ex.Message);
+                        return;
+                    }
+                    break;
             }
         }
         

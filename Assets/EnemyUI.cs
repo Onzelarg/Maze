@@ -6,12 +6,11 @@ public class EnemyUI : MonoBehaviour
 {
     public GameObject damageText;
     List<GameObject> popups;
-    public GameObject parent;
     public GameObject popupParent;
     public float yOffset=20;
-    public Vector3 offset;
     Camera mainCam;
     GameObject player;
+    
 
     public static EnemyUI instance;
 
@@ -30,8 +29,6 @@ public class EnemyUI : MonoBehaviour
         }
     }
      
-
-
     public void damageIndicator(GameObject gameObject,int amount)
     {
         Vector3 boundY = gameObject.GetComponentInChildren<Collider>().bounds.size;

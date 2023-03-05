@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4879623051124599065}
   - component: {fileID: 3776511031804965068}
   - component: {fileID: 6967486857165730268}
+  - component: {fileID: 7052676922765972848}
   m_Layer: 0
   m_Name: damagepopup
   m_TagString: Untagged
@@ -206,3 +207,18 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &7052676922765972848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4879623051124599064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0.07008721, g: 0.990566, b: 0.13925374, a: 0.5}
+  m_EffectDistance: {x: 1, y: -1}
+  m_UseGraphicAlpha: 1

@@ -1,10 +1,14 @@
+using System.Linq;
 using TMPro;
+using UnityEditor.PackageManager;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemyBase : MonoBehaviour
 {
     public EnemyScriptable enemy;
-    public int health;
+    public float health;
+    float maxHealth;
     public int damage;
     public float aggroRange;
     public float attackRange;
@@ -25,6 +29,14 @@ public class EnemyBase : MonoBehaviour
     damageIndicator indicator;
     delegate void playerHealth(int amount);
     playerHealth pHealth;
+    public GameObject healthbar;
+    Camera mainCam;
+    Image healthImage;
+    float spawnRange;
+    float despawnRange;
+    Vector3 lastPosition;
+    float update_time;
+    float time;
 
     enum State
     {
@@ -38,6 +50,8 @@ public class EnemyBase : MonoBehaviour
     void Awake()
     {
         player = GameObject.FindGameObjectWithTag("Player");
+        mainCam = Camera.main;
+        update_time = 2.4f;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -47,7 +61,8 @@ public class EnemyBase : MonoBehaviour
             int damage = collision.collider.GetComponent<Weapon>().damage;
             indicator(this.gameObject,damage);
             health -= damage;
-            if (health <= 0)
+            healthImage.fillAmount = (health / maxHealth);
+            if (health <= 0) 
             {
                 Destroy(this.gameObject);
             }
@@ -59,16 +74,19 @@ public class EnemyBase : MonoBehaviour
             pHealth(damage);
         }
 
-
+         
     }
 
     public void updateStats()
     {
         this.health = enemy.health;
+        this.maxHealth = enemy.health;
         this.damage = enemy.damage;
         this.aggroRange = enemy.aggroRange;
         this.attackRange = enemy.attackRange;
         this.speed = enemy.speed;
+        this.spawnRange = enemy.spawnRange;
+        this.despawnRange = enemy.despawnRange;
         currentState = State.Wander;
         target = Vector3.zero;
         rb = this.GetComponent<Rigidbody>();
@@ -77,10 +95,31 @@ public class EnemyBase : MonoBehaviour
         speed = 4f;
         indicator = EnemyUI.instance.damageIndicator;
         pHealth = Player.instance.updateHealth;
+         
+        Vector3 boundY = gameObject.GetComponent<Collider>().bounds.size;
+        Vector3 goPosition = gameObject.transform.position;
+        Vector3 position = new Vector3(goPosition.x, (goPosition.y + boundY.y), goPosition.z);
+        healthbar=Instantiate(healthbar, position, mainCam.transform.rotation, transform);
+        healthbar.transform.name = gameObject.transform.name+" healthbar";
+        Image[] images = new Image[2];
+        images = healthbar.GetComponentsInChildren<Image>();
+        healthImage = images[1];
+        lastPosition = transform.position;
     }
-
+     
     void Update()
     {
+        time += Time.deltaTime;
+        if (time >= update_time) checkPosition();
+      
+
+
+
+        if (healthbar!=null)
+        {
+            healthbar.transform.rotation = mainCam.transform.rotation;
+        }
+        
         currentState = getState();
         switch (currentState)
         {
@@ -111,9 +150,19 @@ public class EnemyBase : MonoBehaviour
         
     }
 
+    void checkPosition()
+    {
+        time -= update_time;
+        Vector3 difference = transform.position-lastPosition;
+        float differenceB = Mathf.Abs(difference.x) + Mathf.Abs(difference.y) + Mathf.Abs(difference.z);
+        lastPosition = transform.position;
+        if (differenceB < 1.5f) getTarget();
+    }
+
     State getState()
     {
         float distance = Vector3.Distance(this.transform.position, player.transform.position);
+        if (distance>despawnRange) deSpawn();
         if (distance < attackRange)
         {
             return State.Attacking;
@@ -123,6 +172,11 @@ public class EnemyBase : MonoBehaviour
             return State.Aggrod;
         }
         return State.Wander;
+    }
+
+    void deSpawn()
+    {
+        Destroy(gameObject);
     }
 
     private bool NeedsDestination()
@@ -146,12 +200,17 @@ public class EnemyBase : MonoBehaviour
     {
         if (currentState==State.Wander)
         {
-            Vector3 toMove = (transform.position + (transform.forward * 4f)) + new Vector3(UnityEngine.Random.Range(-wanderDistance, wanderDistance), 0f, UnityEngine.Random.Range(-wanderDistance, wanderDistance));
-            target = new Vector3(toMove.x, transform.position.y, toMove.z);
-            Vector3 direction = Vector3.Normalize(target - transform.position);
-            direction = new Vector3(direction.x, 0f, direction.z);
-            targetRotation = Quaternion.LookRotation(direction);
-            transform.rotation = targetRotation;
+            bool noObstacle = false;
+            do
+            {
+                Vector3 toMove = (transform.position + (transform.forward * 4f)) + new Vector3(UnityEngine.Random.Range(-wanderDistance, wanderDistance), 0f, UnityEngine.Random.Range(-wanderDistance, wanderDistance));
+                target = new Vector3(toMove.x, transform.position.y, toMove.z);               
+                Vector3 direction = Vector3.Normalize(target - transform.position);
+                direction = new Vector3(direction.x, 0f, direction.z);
+                targetRotation = Quaternion.LookRotation(direction);
+                transform.rotation = targetRotation;
+                noObstacle = obstacle(direction);
+            } while (noObstacle);
         }
         else if(currentState==State.Aggrod)
         {
@@ -159,7 +218,14 @@ public class EnemyBase : MonoBehaviour
             transform.LookAt(player.transform);
         }
     }
-     
+
+    bool obstacle(Vector3 direction)
+    {
+        Ray ray = new Ray(transform.position, direction);
+        RaycastHit[] hitSomething = Physics.RaycastAll(ray, wanderDistance*1.1f, 11);
+        return hitSomething.Any();
+    }
+
     void attack()
     {
         if (!attacking)
@@ -179,12 +245,13 @@ public class EnemyBase : MonoBehaviour
     {
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(this.transform.position, attackRange);
+        Gizmos.DrawWireSphere(this.transform.position, despawnRange);
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(this.transform.position, aggroRange);
         Gizmos.DrawLine(transform.position, target);
         Gizmos.color = Color.yellow;
         Vector3 fw = transform.forward;
-        Gizmos.DrawRay(transform.forward, new Vector3(fw.x+5,fw.y,fw.z+5));
+        Gizmos.DrawRay(fw, new Vector3(fw.x+5,fw.y,fw.z+5));
     }
 
 

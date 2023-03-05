@@ -39,6 +39,9 @@ public class MazeGeneratorInspector : Editor
     int cubez = 3;
     int cube2 = 10;
     bool ps = false;
+    int start = 5;
+    int w = 31;
+    int h = 31;
 
     char[] letterIndex = { 'A','a','B','b','C','c','D','d','E','e','F','f','G','g','H','h','I','i','J',
         'j','K','k','L','l','M','m','N','n','O','o','P','p','Q','q','R','r','S','s','T','t','U','u','V',
@@ -151,6 +154,20 @@ public class MazeGeneratorInspector : Editor
         }
 
 
+        GUILayout.EndHorizontal();
+
+        GUILayout.BeginHorizontal();
+        start = EditorGUILayout.IntField(start, GUILayout.Width(35));
+        w = EditorGUILayout.IntField(w, GUILayout.Width(35));
+        h = EditorGUILayout.IntField(h, GUILayout.Width(35));
+        if (GUILayout.Button("Test"))
+        {
+            _mazeGenerator.test(start,w,h);
+        }
+        if (GUILayout.Button("Test no room"))
+        {
+            _mazeGenerator.testNoRoom(start, w, h);
+        }
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();

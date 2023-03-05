@@ -3,7 +3,9 @@ guid: bb2f0c84bf61244fcb92acd62e8a913a
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - enemy: {instanceID: 0}
+  - healthbar: {fileID: 3327734558117192077, guid: 40eab12a8c3d2428e871d5d992c201e9, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

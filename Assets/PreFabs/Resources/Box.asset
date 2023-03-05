@@ -16,5 +16,7 @@ MonoBehaviour:
   health: 5
   aggroRange: 10
   attackRange: 1
+  spawnRange: 5
+  despawnRange: 20
   speed: 5
   damage: 2
